@@ -21,13 +21,14 @@ func NewRunner(configName string) *Runner {
 
 	config := getConfiguration(configName)
 
-	log.Printf("config: %v", config)
 	runner.config = config
 
 	return runner
 }
 
 func (runner *Runner) Copy() {
+	defer handleFinish()
+
 	runner.walkPath("")
 }
 
@@ -134,4 +135,11 @@ func (runner *Runner) copyFile(context *context) error {
 	}
 
 	return err
+}
+
+func handleFinish() {
+	recovery := recover()
+	if recovery != nil {
+		log.Printf("panic occurred:\n    %v", recovery)
+	}
 }
