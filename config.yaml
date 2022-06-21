@@ -1,0 +1,7 @@
+nms:
+  name: No Man's Sky
+  source: C:\Users\andre\AppData\Roaming\HelloGames\NMS\st_76561197970753391
+  destinations:
+    - C:\Game Saves\NMS Backup
+    - \\Valhalla\Andrew\Game Saves\NMS Backup
+  replace: true
