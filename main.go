@@ -25,6 +25,8 @@ func init() {
 }
 
 func main() {
+	defer handleExit()
+
 	if len(operation) < 1 {
 		log.Fatal("The operation field is required. Exiting...")
 	}
@@ -37,4 +39,12 @@ func parseArguments() {
 	flag.StringVar(&operation, "operation", "", "defines the operation to execute (required)")
 
 	flag.Parse()
+}
+
+func handleExit() {
+	recovery := recover()
+	if recovery != nil {
+		log.Printf("panic occurred:\n    %v", recovery)
+		log.Print("exiting program")
+	}
 }
