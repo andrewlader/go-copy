@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/spf13/viper"
-	"gitlab.com/andrewlader/go-copy/copier"
+	"gitlab.com/andrewlader/go-copy/backup"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -33,7 +33,7 @@ func main() {
 		log.Fatal("The operation field is required. Exiting...")
 	}
 
-	runner := copier.NewRunner(operation)
+	runner := backup.NewRunner(operation)
 	go runner.Copy()
 
 	runner.Waiter.Wait()
