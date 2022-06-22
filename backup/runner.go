@@ -35,8 +35,7 @@ func (runner *Runner) Copy() {
 
 	runner.Stats = &fileCopier.stats
 
-	log.Printf("\r%-*s", lineLength, "file copy complete...")
-	log.Println()
+	printF("file copy complete...")
 }
 
 func (runner *Runner) handleFinish() {

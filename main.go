@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/fatih/color"
 	"github.com/spf13/viper"
 	"gitlab.com/andrewlader/go-copy/backup"
 	"golang.org/x/text/language"
@@ -38,11 +39,13 @@ func main() {
 
 	runner.Waiter.Wait()
 
-	fmt.Print("Stats:\n")
-	fmt.Printf("    Files Copied: %d\n", runner.Stats.FilesCopied)
+	stats := color.New(color.FgBlue, color.Bold)
+	stats.Println("\nStats:")
+	color.Green("%s%s", color.GreenString("    Files Copied: "), color.MagentaString(fmt.Sprintf("%d", runner.Stats.FilesCopied)))
 	printer := message.NewPrinter(language.English)
-	fmt.Print(printer.Sprintf("    Bytes Copied: %d\n", runner.Stats.BytesCopied))
-	fmt.Printf("    Time to Copy: %f seconds\n", runner.Stats.TimeToCopy.Seconds())
+	color.Green("%s%s", color.GreenString("    Bytes Copied: "), color.MagentaString(printer.Sprintf("%d", runner.Stats.BytesCopied)))
+	color.Green("%s%s", color.GreenString("    Time to Copy: "), color.MagentaString(fmt.Sprintf("%f", runner.Stats.TimeToCopy.Seconds())))
+	color.White("\nAll done...\n\n")
 }
 
 func parseArguments() {
