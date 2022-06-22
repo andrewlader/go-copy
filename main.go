@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/viper"
 	"gitlab.com/andrewlader/go-copy/copier"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 var operation string
@@ -14,12 +16,12 @@ var operation string
 func init() {
 	parseArguments()
 
-	viper.SetConfigName("config") // name of config file (without extension)
-	viper.SetConfigType("yml")    // REQUIRED if the config file does not have the extension in the name
-	viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
-	viper.AddConfigPath(".")      // path to look for the config file in
-	err := viper.ReadInConfig()   // Find and read the config file
-	if err != nil {               // Handle errors reading the config file
+	viper.SetConfigName("go-copy-config") // name of config file (without extension)
+	viper.SetConfigType("yml")            // REQUIRED if the config file does not have the extension in the name
+	viper.SetConfigType("yaml")           // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath(".")              // path to look for the config file in
+	err := viper.ReadInConfig()           // Find and read the config file
+	if err != nil {                       // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 }
@@ -32,7 +34,15 @@ func main() {
 	}
 
 	runner := copier.NewRunner(operation)
-	runner.Copy()
+	go runner.Copy()
+
+	runner.Waiter.Wait()
+
+	fmt.Print("Stats:\n")
+	fmt.Printf("    Files Copied: %d\n", runner.Stats.FilesCopied)
+	printer := message.NewPrinter(language.English)
+	fmt.Print(printer.Sprintf("    Bytes Copied: %d\n", runner.Stats.BytesCopied))
+	fmt.Printf("    Time to Copy: %f seconds\n", runner.Stats.TimeToCopy.Seconds())
 }
 
 func parseArguments() {

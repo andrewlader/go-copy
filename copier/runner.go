@@ -7,11 +7,22 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
+	"sync"
+	"time"
 )
 
+const lineLength = 80
+
 type Runner struct {
+	Waiter     sync.WaitGroup
 	configName string
 	config     *configuration
+	Stats      struct {
+		FilesCopied int
+		BytesCopied int64
+		TimeToCopy  time.Duration
+	}
 }
 
 func NewRunner(configName string) *Runner {
@@ -22,14 +33,22 @@ func NewRunner(configName string) *Runner {
 	config := getConfiguration(configName)
 
 	runner.config = config
+	runner.Waiter.Add(1)
 
 	return runner
 }
 
 func (runner *Runner) Copy() {
-	defer handleFinish()
+	defer runner.handleFinish()
+
+	startTime := time.Now()
 
 	runner.walkPath("")
+
+	log.Printf("\r%-*s", lineLength, "file copy complete...")
+	log.Println()
+
+	runner.Stats.TimeToCopy = time.Now().Sub(startTime)
 }
 
 func (runner *Runner) walkPath(subPath string) {
@@ -40,30 +59,32 @@ func (runner *Runner) walkPath(subPath string) {
 	}
 
 	currentPath := path.Join(runner.config.source, context.subPath)
-	log.Printf("walking path --> %s", currentPath)
 
 	files, err := ioutil.ReadDir(currentPath)
 	if err != nil {
-		log.Printf("skipping path: %v", err)
-	}
-
-	for _, file = range files {
-		if !file.IsDir() {
-			// copy the file
-			context.filename = file.Name()
-			err := runner.copyFileToDestinations(context)
-			if err != nil {
-				log.Printf("failed to copy file \"%s\" due to error: %s", file.Name(), err)
+		log.Printf("skipping path %s: %v", currentPath, err)
+	} else {
+		for _, file = range files {
+			if file.Mode().IsRegular() {
+				// copy the file
+				context.filename = file.Name()
+				err := runner.copyFileToDestinations(context)
+				if err != nil {
+					log.Printf("failed to copy file \"%s\" due to error: %s", file.Name(), err)
+				}
 			}
-		} else {
-			// walk the sub-folder path
-			runner.walkPath(file.Name())
+			if file.IsDir() {
+				// walk the sub-folder path
+				runner.walkPath(path.Join(context.subPath, file.Name()))
+			}
 		}
 	}
 }
 
 func (runner *Runner) copyFileToDestinations(context *context) error {
 	var err error
+
+	log.Printf("copying file \"%s\"", context.filename)
 
 	for _, destPath := range runner.config.destinations {
 		context.destinationPath = destPath
@@ -81,11 +102,17 @@ func (runner *Runner) copyFile(context *context) error {
 	destFilename := path.Join(destPath, context.filename)
 
 	if _, err := os.Stat(destPath); os.IsNotExist(err) {
-		log.Printf("creating sub-path: %s", destPath)
-		err = os.Mkdir(destPath, os.ModeDir)
-		if err != nil {
-			log.Printf("failed to create sub-path: %s", destPath)
-			return err
+		subPaths := strings.Split(context.subPath, "/")
+		newDir := context.destinationPath
+		for _, subPath := range subPaths {
+			newDir = path.Join(newDir, subPath)
+			if _, err := os.Stat(newDir); os.IsNotExist(err) {
+				err = os.Mkdir(newDir, os.ModeDir)
+				if err != nil {
+					log.Printf("failed to create sub-path: %s", newDir)
+					return err
+				}
+			}
 		}
 	}
 
@@ -111,15 +138,12 @@ func (runner *Runner) copyFile(context *context) error {
 	}
 	defer destFile.Close()
 
-	log.Printf("copying \"%s\" to destination \"%s\"", context.filename, destPath)
-
 	bytesWritten, err := io.Copy(destFile, sourceFile)
 	if err != nil {
 		return err
 	}
-	log.Printf("copied %d bytes", bytesWritten)
 
-	// flush file to storage
+	// flush file to storage and close it BEFORE changing the modified time of the file
 	err = destFile.Sync()
 	if err != nil {
 		return err
@@ -130,16 +154,19 @@ func (runner *Runner) copyFile(context *context) error {
 	err = os.Chtimes(destFilename, sourceFileStat.ModTime(), sourceFileStat.ModTime())
 	if err != nil {
 		log.Printf("failed to changed modified time: %s", err)
-	} else {
-		log.Printf("changed modified time to %v", sourceFileStat.ModTime())
 	}
+
+	runner.Stats.FilesCopied++
+	runner.Stats.BytesCopied += bytesWritten
 
 	return err
 }
 
-func handleFinish() {
+func (runner *Runner) handleFinish() {
 	recovery := recover()
 	if recovery != nil {
 		log.Printf("panic occurred:\n    %v", recovery)
 	}
+
+	runner.Waiter.Done()
 }
