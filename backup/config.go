@@ -1,4 +1,4 @@
-package copier
+package backup
 
 import (
 	"github.com/spf13/viper"
