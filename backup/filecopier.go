@@ -50,7 +50,7 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 
 	files, err := ioutil.ReadDir(currentPath)
 	if err != nil {
-		printWarningF(fmt.Sprintf("skipping path %s: %v", currentPath, err))
+		PrintWarning(fmt.Sprintf("skipping path %s: %v", currentPath, err))
 	} else {
 		for _, file = range files {
 			if file.Mode().IsRegular() {
@@ -58,7 +58,7 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 				context.filename = file.Name()
 				err := fileCopier.copyFileToDestinations(context)
 				if err != nil {
-					printErrorF(fmt.Sprintf("failed to copy file \"%s\" due to error: %s", file.Name(), err))
+					PrintError(fmt.Sprintf("failed to copy file \"%s\" due to error: %s", file.Name(), err))
 				}
 			}
 			if file.IsDir() {
@@ -72,7 +72,7 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) error {
 	var err error
 
-	printF(fmt.Sprintf("copying file \"%s\"", context.filename))
+	Print(fmt.Sprintf("copying file \"%s\"", context.filename))
 
 	for _, destPath := range fileCopier.config.destinations {
 		context.destinationPath = destPath
@@ -81,12 +81,13 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) error
 		destinationPath := path.Join(context.destinationPath, context.subFolderPath)
 		err = fileCopier.createSubFolders(context, destinationPath)
 		if err != nil {
+			// failed to create the sub-folder(s), so skip this path and continue
 			continue
 		}
 
 		err = fileCopier.copyFile(context, destinationPath)
 		if err != nil {
-			printErrorF(fmt.Sprintf("error copying file %s: %s", context.filename, err))
+			PrintError(fmt.Sprintf("error copying file %s: %s", context.filename, err))
 		}
 	}
 
@@ -116,7 +117,7 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 
 	destFile, err := os.Create(destFilename)
 	if err != nil {
-		printErrorF(fmt.Sprintf("error creating %s: %s", destFilename, err))
+		PrintError(fmt.Sprintf("error creating %s: %s", destFilename, err))
 		return err
 	}
 	defer destFile.Close()
@@ -136,7 +137,7 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	// update the access and modified time for the file to be that of the original file
 	err = os.Chtimes(destFilename, sourceFileStat.ModTime(), sourceFileStat.ModTime())
 	if err != nil {
-		printErrorF(fmt.Sprintf("failed to changed modified time: %s", err))
+		PrintError(fmt.Sprintf("failed to changed modified time: %s", err))
 	}
 
 	fileCopier.stats.FilesCopied++
@@ -159,7 +160,7 @@ func (fileCopier *fileCopier) createSubFolders(context *copyContext, destination
 			if _, err := os.Stat(newDir); os.IsNotExist(err) {
 				err = os.Mkdir(newDir, os.ModeDir)
 				if err != nil {
-					printErrorF(fmt.Sprintf("failed to create sub-path: %s", newDir))
+					PrintError(fmt.Sprintf("failed to create sub-path: %s", newDir))
 					break
 				}
 			}
@@ -172,6 +173,6 @@ func (fileCopier *fileCopier) createSubFolders(context *copyContext, destination
 func (fileCopier *fileCopier) handleFinish() {
 	recovery := recover()
 	if recovery != nil {
-		printErrorF(fmt.Sprintf("panic occurred:\n    %v", recovery))
+		PrintError(fmt.Sprintf("panic occurred:\n    %v", recovery))
 	}
 }

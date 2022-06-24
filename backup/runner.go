@@ -35,7 +35,7 @@ func (runner *Runner) Copy() {
 
 	runner.Stats = &fileCopier.stats
 
-	printF("file copy complete...")
+	Print("file copy complete...")
 }
 
 func (runner *Runner) handleFinish() {
