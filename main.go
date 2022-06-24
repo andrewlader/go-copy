@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"os"
 
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
@@ -15,6 +15,8 @@ import (
 var operation string
 
 func init() {
+	defer handleExit()
+
 	parseArguments()
 
 	viper.SetConfigName("go-copy-config") // name of config file (without extension)
@@ -23,7 +25,7 @@ func init() {
 	viper.AddConfigPath(".")              // path to look for the config file in
 	err := viper.ReadInConfig()           // Find and read the config file
 	if err != nil {                       // Handle errors reading the config file
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		panic(fmt.Errorf("fatal error processing config file: %s", err))
 	}
 }
 
@@ -31,7 +33,8 @@ func main() {
 	defer handleExit()
 
 	if len(operation) < 1 {
-		log.Fatal("The operation field is required. Exiting...")
+		backup.PrintError("the operation flag is required; it defines which operation in the config to execute...")
+		os.Exit(2)
 	}
 
 	runner := backup.NewRunner(operation)
@@ -40,11 +43,12 @@ func main() {
 	runner.Waiter.Wait()
 
 	stats := color.New(color.FgBlue, color.Bold)
-	stats.Println("\nStats:")
-	color.Green("%s%s", color.GreenString("    Files Copied: "), color.MagentaString(fmt.Sprintf("%d", runner.Stats.FilesCopied)))
+	backup.PrintColor(stats, "\nStats:")
+	backup.PrintStats("    Files Copied: ", fmt.Sprintf("%d", runner.Stats.FilesCopied))
 	printer := message.NewPrinter(language.English)
-	color.Green("%s%s", color.GreenString("    Bytes Copied: "), color.MagentaString(printer.Sprintf("%d", runner.Stats.BytesCopied)))
-	color.Green("%s%s", color.GreenString("    Time to Copy: "), color.MagentaString(fmt.Sprintf("%f", runner.Stats.TimeToCopy.Seconds())))
+	backup.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", runner.Stats.FilesCopied))
+	backup.PrintStats("    Files Copied: ", printer.Sprintf("%d", runner.Stats.BytesCopied))
+	backup.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", runner.Stats.TimeToCopy.Seconds()))
 	color.White("\nAll done...\n\n")
 }
 
@@ -57,7 +61,10 @@ func parseArguments() {
 func handleExit() {
 	recovery := recover()
 	if recovery != nil {
-		log.Printf("panic occurred:\n    %v", recovery)
-		log.Print("exiting program")
+		errOutput := fmt.Sprintf("panic occurred:\n    %v", recovery)
+		backup.PrintError(errOutput)
+		backup.PrintError("exiting...")
+
+		os.Exit(1)
 	}
 }
