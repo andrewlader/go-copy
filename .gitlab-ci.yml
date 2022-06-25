@@ -7,7 +7,24 @@
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
 - test
+- release
+
 sast:
   stage: test
 include:
 - template: Security/SAST.gitlab-ci.yml
+
+release:
+  stage: release
+  only: tags
+  script:
+    - make changelog | tee release_changelog.txt
+  release:
+    name: Release $CI_TAG_NAME
+    description: ./release_changelog.txt
+    assets:
+      links:
+        - name: cool-app.zip
+          url: http://my.awesome.download.site/1.0-$CI_COMMIT_SHORT_SHA.zip
+        - name: cool-app.exe
+          url: http://my.awesome.download.site/1.0-$CI_COMMIT_SHORT_SHA.exe
