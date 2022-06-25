@@ -5,63 +5,50 @@
 # Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
 # Note that environment variables can be set in several places
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+
+image: tetafro/golang-gcc:1.15-alpine
+variables:
+  # Package version can only contain numbers (0-9), and dots (.).
+  # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
+  # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
+  PACKAGE_VERSION: "0.0.5"
+
 stages:
-- test
-- build
-- upload
-- release
+  - lint
+  - build
+  - test
+  - release
+
+lint:
+  stage: lint
+  before_script:
+    - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.41.1
+  script:
+    - ./bin/golangci-lint run -c .golang-ci.yml
+  allow_failure: true
+
+build:
+  stage: build
+  script:
+    - go build
 
 sast:
   stage: test
 include:
 - template: Security/SAST.gitlab-ci.yml
 
-variables:
-  # Package version can only contain numbers (0-9), and dots (.).
-  # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
-  # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
-  PACKAGE_VERSION: "0.0.4"
-  WINDOWS_AMD64_BINARY: "go-copy-windows-amd64-${PACKAGE_VERSION}"
-  DARWIN_AMD64_BINARY: "go-copy-darwin-amd64-${PACKAGE_VERSION}"
-  LINUX_AMD64_BINARY: "go-copy-linux-amd64-${PACKAGE_VERSION}"
-  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myawesomerelease/${PACKAGE_VERSION}"
-
-build:
-  stage: build
-  image: alpine:latest
-  rules:
-    - if: $CI_COMMIT_TAG
-  script:
-    - mkdir bin
-    - echo "Mock binary for ${DARWIN_AMD64_BINARY}" > bin/${DARWIN_AMD64_BINARY}
-    - echo "Mock binary for ${LINUX_AMD64_BINARY}" > bin/${LINUX_AMD64_BINARY}
-  artifacts:
-    paths:
-      - bin/
-
-upload:
-  stage: upload
-  image: curlimages/curl:latest
-  rules:
-    - if: $CI_COMMIT_TAG
-  script:
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${WINDOWS_AMD64_BINARY} ${PACKAGE_REGISTRY_URL}/${WINDOWS_AMD64_BINARY}
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${DARWIN_AMD64_BINARY} ${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${LINUX_AMD64_BINARY} ${PACKAGE_REGISTRY_URL}/${LINUX_AMD64_BINARY}
 
 release:
-  # Caution, as of 2021-02-02 these assets links require a login, see:
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/299384
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  rules:
-    - if: $CI_COMMIT_TAG
+  image:
+      name: goreleaser/goreleaser:v0.164.0
+      entrypoint: ["/bin/bash", "-c"]
+  only:
+    refs:
+      - tags
+  variables:
+    GITLAB_TOKEN: $GITLAB_TOKEN
+
   script:
-    - |
-      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"${WINDOWS_AMD64_BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_AMD64_BINARY}\"}" \
-        --assets-link "{\"name\":\"${DARWIN_AMD64_BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${DARWIN_AMD64_BINARY}\"}" \
-        --assets-link "{\"name\":\"${LINUX_AMD64_BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${LINUX_AMD64_BINARY}\"}"
+    - cd "$CI_PROJECT_DIR"
+    - goreleaser release --rm-dist
