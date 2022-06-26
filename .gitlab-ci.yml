@@ -67,7 +67,7 @@ build windows amd64:
   artifacts:
     name: go-copy
     paths:
-      - dist/$PACKAGE_VERSION/windows/amd64
+      - dist/$PACKAGE_VERSION/windows/amd64/go-copy.exe
     expire_in: never
     reports:
       dotenv: job-windows-amd64.env
@@ -100,9 +100,9 @@ release-windows-amd64:
     assets:
       links:
         - name: go-copy.exe
-          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/'$JOB_ID'/artifacts/download"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/`$JOB_ID`/artifacts/download"
         - name: go-copy
-          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/'$JOB_ID'/dist/windows/amd64"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/`$JOB_ID`/dist/windows/amd64"
 
 # release:
 #   stage: release
