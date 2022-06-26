@@ -66,19 +66,34 @@ build windows amd64:
 # include:
 # - template: Security/SAST.gitlab-ci.yml
 
-
-release:
+create:release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: build windows amd64
+      artifacts: true
+  variables:
+    TAG: '$PACKAGE_VERSION'
   script:
-    - |
-      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/darwin/amd64/*"}"
-    - |
-      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/darwin/arm64/*"}"
-    - |
-      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/windows/amd64/*"}"
-  # rules:
-    # - if: $CI_COMMIT_TAG
+    - echo "Create Release $TAG"
+  release:
+    name: 'Release $TAG'
+    tag_name: '$TAG'
+    ref: '$TAG'
+    description: 'Release $TAG'
+
+# release:
+#   stage: release
+#   image: registry.gitlab.com/gitlab-org/release-cli:latest
+#   script:
+#     - |
+#       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
+#         --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/darwin/amd64/*"}"
+#     - |
+#       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
+#         --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/darwin/arm64/*"}"
+#     - |
+#       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
+#         --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/windows/amd64/*"}"
+#   # rules:
+#     # - if: $CI_COMMIT_TAG
