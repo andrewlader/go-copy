@@ -39,6 +39,6 @@ generate_executables:
     name: go-copy
     paths:
       # Should be relative to your root directory
-      - dist/$CI_COMMIT_TAG/macos/amd64
-      - dist/$CI_COMMIT_TAG/macos/arm64
-      - dist/$CI_COMMIT_TAG/windows/amd64
+      - dist/$PACKAGE_VERSION/macos/amd64
+      - dist/$PACKAGE_VERSION/macos/arm64
+      - dist/$PACKAGE_VERSION/windows/amd64
