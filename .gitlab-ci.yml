@@ -6,7 +6,7 @@
 # Note that environment variables can be set in several places
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 
-image: tetafro/golang-gcc:1.15-alpine
+# image: tetafro/golang-gcc:1.15-alpine
 variables:
   # Package version can only contain numbers (0-9), and dots (.).
   # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
@@ -16,6 +16,7 @@ variables:
 stages:
   - build
   # - test
+  - release
 
 build mac amd64:
   stage: build
