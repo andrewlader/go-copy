@@ -11,7 +11,7 @@ variables:
   # Package version can only contain numbers (0-9), and dots (.).
   # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
   # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
-  PACKAGE_VERSION: "0.0.5"
+  PACKAGE_VERSION: $CLI_COMMIT_TAG
 
 stages:
   - build
@@ -100,7 +100,9 @@ release-windows-amd64:
     assets:
       links:
         - name: go-copy.exe
-          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/'$JOB_ID'/artifacts/download"
+        - name: go-copy
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/'$JOB_ID'/dist/windows/amd64"
 
 # release:
 #   stage: release
