@@ -22,7 +22,7 @@ stages:
 build:
   stage: build
   script:
-    - go build
+    - go build -o dist/
 
 # sast:
 #   stage: test
@@ -34,7 +34,7 @@ generate_executables:
   script:
     # - goos=darwin goarch=amd64 go build
     # - goos=darwin goarch=arm64 go build
-    - goos=windows goarch=amd64 go build
+    - goos=windows goarch=amd64 go build -o dist/$PACKAGE_VERSION/windows/amd64
     - ls -al .
   artifacts:
     name: go-copy
