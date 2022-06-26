@@ -35,6 +35,7 @@ generate_executables:
     # - goos=darwin goarch=amd64 go build
     # - goos=darwin goarch=arm64 go build
     - goos=windows goarch=amd64 go build
+    - ls -al .
   artifacts:
     name: go-copy
     paths:
