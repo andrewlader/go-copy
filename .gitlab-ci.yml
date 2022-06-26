@@ -76,6 +76,7 @@ create:release:
     TAG: '$PACKAGE_VERSION'
   script:
     - echo "Create Release $TAG"
+    -  --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/$PACKAGE_VERSION/windows/amd64/*"}"
   release:
     name: 'Release $TAG'
     tag_name: '$TAG'
