@@ -15,7 +15,7 @@ variables:
 
 stages:
   - build
-  - test
+  # - test
   - generate_executables
   - release
 
@@ -24,17 +24,17 @@ build:
   script:
     - go build
 
-sast:
-  stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
+# sast:
+#   stage: test
+# include:
+# - template: Security/SAST.gitlab-ci.yml
 
 generate_executables:
   stage: generate_executables
   script:
-    - goos=darwin goarch=amd64 go build -o dist/macos/amd64
-    - goos=darwin goarch=arm64 go build dist/macos/arm64
-    - goos=windows goarch=amd64 go build dist/windows/amd64
+    # - goos=darwin goarch=amd64 go build
+    # - goos=darwin goarch=arm64 go build
+    - goos=windows goarch=amd64 go build
   artifacts:
     name: go-copy
     paths:
