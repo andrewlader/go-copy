@@ -22,7 +22,7 @@ stages:
 build:
   stage: build
   script:
-    - go build -o dist/
+    - go build
 
 # sast:
 #   stage: test
