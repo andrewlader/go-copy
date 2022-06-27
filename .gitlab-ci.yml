@@ -25,19 +25,15 @@ stages:
 build mac amd64:
   stage: build
   script:
-    - echo "current branch:"
-    - echo $CI_COMMIT_BRANCH
-    - echo "${CI_JOB_ID}" > CI_JOB_ID.txt
-    - goos=darwin goarch=amd64 go build -o dist/$PACKAGE_VERSION/darwin/amd64
+    - goos=darwin goarch=amd64 go build -o go-copy
     # - goos=darwin goarch=amd64 go build
   after_script:
-    - echo "JOB_ID=$CI_JOB_ID" >> job-darwin-amd64.env
+    - echo "JOB_DARWIN_AMD64_ID=$CI_JOB_ID" >> job-darwin-amd64.env
   artifacts:
     name: go-copy
     paths:
-      - dist/$PACKAGE_VERSION/macos/amd64
-      - CI_JOB_ID.txt
-    expire_in: never
+      - ./go-copy*.*
+    expire_in: 1 days
     reports:
       dotenv: job-darwin-amd64.env
 
@@ -47,15 +43,15 @@ build mac amd64:
 build mac arm64:
   stage: build
   script:
-    - goos=darwin goarch=arm64 go build -o dist/$PACKAGE_VERSION/darwin/arm64
+    - goos=darwin goarch=arm64 go build -o go-copy
     # - goos=darwin goarch=arm64 go build
   after_script:
-    - echo "JOB_ID=$CI_JOB_ID" >> job-darwin-arm64.env
+    - echo "JOB_JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
   artifacts:
     name: go-copy
     paths:
-      - dist/$PACKAGE_VERSION/macos/arm64
-    expire_in: never
+      - ./go-copy*.*
+    expire_in: 1 days
     reports:
       dotenv: job-darwin-arm64.env
   # rules:
@@ -64,16 +60,14 @@ build mac arm64:
 build windows amd64:
   stage: build
   script:
-    # - goos=windows goarch=amd64 go build -o dist/$PACKAGE_VERSION/windows/amd64
     - goos=windows goarch=amd64 go build -o go-copy.exe
   after_script:
-    - ls -alR .
-    - echo "JOB_ID=$CI_JOB_ID" >> job-windows-amd64.env
+    - echo "JOB_WINDOWS_AMD64_ID=$CI_JOB_ID" >> job-windows-amd64.env
   artifacts:
     name: go-copy
     paths:
       - ./*.exe
-    expire_in: never
+    expire_in: 1 days
     reports:
       dotenv: job-windows-amd64.env
   # rules:
@@ -93,38 +87,19 @@ release-windows-amd64:
   variables:
     TAG: '$CI_COMMIT_TAG'
     URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
-    NAME: "go-copy.zip"
   script:
     - echo "Create Release " $TAG
-    - echo $JOB_ID
-    - echo $URL
-    - echo $NAME
-    - echo ${PACKAGE_REGISTRY_URL}
-    # - release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":\"go-copy-windws-amd64.zip\",\"url\":$URL}"
   release:
     name: 'Release $TAG'
     tag_name: 'v$TAG'
-    # ref: '$TAG'
     description: 'Release go-copy version $TAG'
     assets:
       links:
-        - name: "go-copy windows amd64 ${CI_COMMIT_TAG}"
-          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
-        # - name: go-copy
-        #   url: "https://gitlab.com/andrewlader/go-copy/-/jobs/`$JOB_ID`/dist/windows/amd64"
-
-# release:
-#   stage: release
-#   image: registry.gitlab.com/gitlab-org/release-cli:latest
-#   script:
-#     - |
-#       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-#         --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/darwin/amd64/*"}"
-#     - |
-#       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-#         --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/darwin/arm64/*"}"
-#     - |
-#       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-#         --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/windows/amd64/*"}"
+        - name: "go-copy darwin amd64"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_AMD64_ID/artifacts/download"
+        - name: "go-copy darwin arm64"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_ARM64_ID/artifacts/download"
+        - name: "go-copy windows amd64"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
 #   # rules:
 #     # - if: $CI_COMMIT_TAG
