@@ -100,16 +100,16 @@ release-windows-amd64:
     - echo $URL
     - echo $NAME
     - echo ${PACKAGE_REGISTRY_URL}
-    - release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":\"go-copy-windws-amd64.zip\",\"url\":$URL}"
-  # release:
-  #   name: 'Release $TAG'
-  #   tag_name: '$TAG'
-  #   ref: '$TAG'
-  #   description: 'Release with tag $TAG'
-  #   assets:
-  #     links:
-  #       - name: "go-copy windows amd64 ${CI_COMMIT_TAG}"
-  #         url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/dist/windows/amd64"
+    # - release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":\"go-copy-windws-amd64.zip\",\"url\":$URL}"
+  release:
+    name: 'Release $TAG'
+    tag_name: '$TAG'
+    ref: '$TAG'
+    description: 'Release go-copy version $TAG'
+    assets:
+      links:
+        - name: "go-copy windows amd64 ${CI_COMMIT_TAG}"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
         # - name: go-copy
         #   url: "https://gitlab.com/andrewlader/go-copy/-/jobs/`$JOB_ID`/dist/windows/amd64"
 
