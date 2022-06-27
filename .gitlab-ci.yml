@@ -65,13 +65,13 @@ build windows amd64:
   stage: build
   script:
     # - goos=windows goarch=amd64 go build -o dist/$PACKAGE_VERSION/windows/amd64
-    - goos=windows goarch=amd64 go build -o .
+    - goos=windows goarch=amd64 go build -o bin/
   after_script:
     - echo "JOB_ID=$CI_JOB_ID" >> job-windows-amd64.env
   artifacts:
     name: go-copy
     paths:
-      - ./go-copy.exe
+      - bin/go-copy.exe
     expire_in: never
     reports:
       dotenv: job-windows-amd64.env
