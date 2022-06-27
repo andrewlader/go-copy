@@ -34,7 +34,7 @@ build mac arm64:
     # - rm -rf $CI_PROJECT_DIR/bin
     # - env GOOS=darwin GOARCH=arm64 go build -o go-copy
     - go env
-    - apt-get install build-essential
+    - apk --no-cache --update add build-base
     # - env CC="clang" CXX="clang++" GOGCCFLAGS="-fPIC -arch arm64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build531992441=/tmp/go-build -gno-record-gcc-switches" GOOS=darwin GOARCH=arm64 go build
     - env GOOS=darwin GOARCH=arm64 go build
   after_script:
