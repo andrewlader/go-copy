@@ -2,9 +2,6 @@ image: tetafro/golang-gcc:1.15-alpine
 variables:
   PACKAGE_VERSION: 0.0.5
   CI_COMMIT_TAG: ${PACKAGE_VERSION}
-  DARWIN_AMD64_BINARY: "myapp-darwin-amd64-${CI_COMMIT_TAG}"
-  LINUX_AMD64_BINARY: "myapp-linux-amd64-${CI_COMMIT_TAG}"
-  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/myapp/${CI_COMMIT_TAG}"
 
 stages:
   - build
@@ -14,7 +11,7 @@ stages:
 build mac amd64:
   stage: build
   script:
-    - GOOS=darwin GOARCH=amd64 go build -o go-copy
+    - env GOOS=darwin GOARCH=amd64 go build -o go-copy
     # - goos=darwin goarch=amd64 go build
   after_script:
     - echo "JOB_DARWIN_AMD64_ID=$CI_JOB_ID" >> job-darwin-amd64.env
@@ -33,7 +30,7 @@ build mac amd64:
 build mac arm64:
   stage: build
   script:
-    - GOOS=darwin GOARCH=arm64 go build -o go-copy
+    - env GOOS=darwin GOARCH=arm64 go build -o go-copy
     # - goos=darwin goarch=arm64 go build
   after_script:
     - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
@@ -50,7 +47,7 @@ build mac arm64:
 build windows amd64:
   stage: build
   script:
-    - GOOS=windows GOARCH=amd64 go build -o go-copy.exe
+    - env GOOS=windows GOARCH=amd64 go build -o go-copy.exe
   after_script:
     - echo "JOB_WINDOWS_AMD64_ID=$CI_JOB_ID" >> job-windows-amd64.env
   artifacts:
