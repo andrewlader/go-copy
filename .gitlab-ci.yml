@@ -60,6 +60,8 @@ build windows amd64:
     name: go-copy
     paths:
       - ./*.exe
+      - ./mac/amd64
+      - ./mac/arm64
     expire_in: 1 days
     reports:
       dotenv: job-windows-amd64.env
