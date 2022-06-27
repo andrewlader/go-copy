@@ -14,7 +14,7 @@ stages:
 build mac amd64:
   stage: build
   script:
-    - GOOSdarwin GOARCH=amd64 go build -o go-copy
+    - GOOS=darwin GOARCH=amd64 go build -o go-copy
     # - goos=darwin goarch=amd64 go build
   after_script:
     - echo "JOB_DARWIN_AMD64_ID=$CI_JOB_ID" >> job-darwin-amd64.env
