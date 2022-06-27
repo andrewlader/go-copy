@@ -91,7 +91,7 @@ release-windows-amd64:
     - job: build windows amd64
       artifacts: true
   variables:
-    TAG: '$PACKAGE_VERSION'
+    TAG: '$CI_COMMIT_TAG'
     URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
     NAME: "go-copy.zip"
   script:
