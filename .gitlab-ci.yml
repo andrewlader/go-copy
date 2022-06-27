@@ -100,7 +100,7 @@ release-windows-amd64:
     - echo ${URL}
     - echo ${NAME}
     - echo ${PACKAGE_REGISTRY_URL}
-    - release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":$NAME,\"url\":$URL}"
+    # - release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":$NAME,\"url\":$URL}"
   release:
     name: 'Release $TAG'
     tag_name: '$TAG'
