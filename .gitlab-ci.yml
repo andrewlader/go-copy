@@ -60,8 +60,8 @@ build windows amd64:
     name: go-copy
     paths:
       - ./*.exe
-      - ./mac/amd64
-      - ./mac/arm64
+      - mac/amd64
+      - mac/arm64
     expire_in: 1 days
     reports:
       dotenv: job-windows-amd64.env
@@ -99,7 +99,7 @@ release-windows-amd64:
     assets:
       links:
         - name: "go-copy darwin amd64"
-          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download/mac/amd64"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/mac/amd64"
         - name: "go-copy darwin arm64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download/mac/arm64"
         - name: "go-copy windows amd64"
