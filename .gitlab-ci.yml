@@ -27,14 +27,14 @@ build mac amd64:
 
 build mac arm64:
   stage: build
-  image: "gitlab/gitlab-runner-helper:arm64-latest"
   script:
     # - echo $CI_PROJECT_DIR
     # - rm -rf ~/.cache/go-build
     # - rm -rf $CI_PROJECT_DIR/pkg
     # - rm -rf $CI_PROJECT_DIR/bin
     # - env GOOS=darwin GOARCH=arm64 go build -o go-copy
-    - env GOOS=darwin GOARCH=arm64 go build
+    - go env
+    - env GOGCCFLAGS="-fPIC -arch arm64 -pthread -fno-caret-diagnostics -Qunused-arguments -fmessage-length=0 -fdebug-prefix-map=/var/folders/r7/kh1m7ycn2gdcbm0p_tbpd8pw0000gn/T/go-build1572268861=/tmp/go-build -gno-record-gcc-switches -fno-common" CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build
   after_script:
     - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
   artifacts:
