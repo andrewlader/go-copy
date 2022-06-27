@@ -71,7 +71,7 @@ build windows amd64:
   artifacts:
     name: go-copy
     paths:
-      - dist/$PACKAGE_VERSION/windows/amd64/go-copy.exe
+      - dist/$PACKAGE_VERSION/windows/amd64/
     expire_in: never
     reports:
       dotenv: job-windows-amd64.env
