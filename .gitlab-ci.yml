@@ -65,7 +65,7 @@ build windows amd64:
   stage: build
   script:
     # - goos=windows goarch=amd64 go build -o dist/$PACKAGE_VERSION/windows/amd64
-    - goos=windows goarch=amd64 go build
+    - goos=windows goarch=amd64 go build -o .
   after_script:
     - echo "JOB_ID=$CI_JOB_ID" >> job-windows-amd64.env
   artifacts:
