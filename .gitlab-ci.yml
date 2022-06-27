@@ -1,16 +1,5 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-
 image: tetafro/golang-gcc:1.15-alpine
 variables:
-  # Package version can only contain numbers (0-9), and dots (.).
-  # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
-  # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
   PACKAGE_VERSION: 0.0.5
   CI_COMMIT_TAG: ${PACKAGE_VERSION}
   DARWIN_AMD64_BINARY: "myapp-darwin-amd64-${CI_COMMIT_TAG}"
@@ -32,7 +21,7 @@ build mac amd64:
   artifacts:
     name: go-copy
     paths:
-      - ./go-copy*.*
+      - ./go-copy
     expire_in: 1 days
     reports:
       dotenv: job-darwin-amd64.env
@@ -50,7 +39,7 @@ build mac arm64:
   artifacts:
     name: go-copy
     paths:
-      - ./go-copy*.*
+      - ./go-copy
     expire_in: 1 days
     reports:
       dotenv: job-darwin-arm64.env
@@ -89,6 +78,9 @@ release-windows-amd64:
     URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
   script:
     - echo "Create Release " $TAG
+    - echo $JOB_DARWIN_AMD64_ID
+    - echo $JOB_DARWIN_ARM64_ID
+    - echo $JOB_WINDOWS_AMD64_ID
   release:
     name: 'Release $TAG'
     tag_name: 'v$TAG'
