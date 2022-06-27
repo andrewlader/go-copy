@@ -36,7 +36,7 @@ build mac arm64:
     - goos=darwin goarch=arm64 go build -o go-copy
     # - goos=darwin goarch=arm64 go build
   after_script:
-    - echo "JOB_JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
+    - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
   artifacts:
     name: go-copy
     paths:
@@ -80,8 +80,6 @@ release-windows-amd64:
     URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
   script:
     - echo "Create Release " $TAG
-    - echo $TAG
-    - echo $CI_COMMIT_TAG
     - echo $URL
     - echo $JOB_DARWIN_AMD64_ID
     - echo $JOB_DARWIN_ARM64_ID
