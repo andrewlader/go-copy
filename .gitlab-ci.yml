@@ -100,7 +100,7 @@ release-windows-amd64:
     - echo ${URL}
     - echo ${NAME}
     - echo ${PACKAGE_REGISTRY_URL}
-    # -  release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":\"Executable file\",\"url\":\"https://gitlab.com/andrewlader/go-copy/dist/$PACKAGE_VERSION/windows/amd64/*"}"
+    -  release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":$NAME,\"url\":$URL}"
   release:
     name: 'Release $TAG'
     tag_name: '$TAG'
@@ -108,8 +108,8 @@ release-windows-amd64:
     description: 'Release with tag $TAG'
     assets:
       links:
-        - name: "${$NAME}"
-          url: '${URL}'
+        - name: '${$NAME}''
+          url: ${URL}
         # - name: go-copy
         #   url: "https://gitlab.com/andrewlader/go-copy/-/jobs/`$JOB_ID`/dist/windows/amd64"
 
