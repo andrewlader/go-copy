@@ -33,7 +33,7 @@ build mac arm64:
     # - rm -rf $CI_PROJECT_DIR/pkg
     # - rm -rf $CI_PROJECT_DIR/bin
     # - env GOOS=darwin GOARCH=arm64 go build -o go-copy
-    - env GOOS=darwin GOARCH=amd64 go build
+    - env GOOS=darwin GOARCH=arm64 go build -ldflags="-extld=aarch64-linux-gnu-gcc"
   after_script:
     - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
   artifacts:
