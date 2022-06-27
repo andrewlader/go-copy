@@ -78,9 +78,13 @@ release-windows-amd64:
   variables:
     TAG: '$CI_COMMIT_TAG'
     URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
+    URL2: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_AMD64_ID/artifacts/download"
+    URL3: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_ARM64_ID/artifacts/download"
   script:
     - echo "Create Release " $TAG
     - echo $URL
+    - echo $URL2
+    - echo $URL3
     - echo $JOB_DARWIN_AMD64_ID
     - echo $JOB_DARWIN_ARM64_ID
     - echo $JOB_WINDOWS_AMD64_ID
