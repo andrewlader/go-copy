@@ -88,7 +88,7 @@ release-windows-amd64:
   variables:
     TAG: '$PACKAGE_VERSION'
     URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_ID/artifacts/download"
-    NAME: "go-copy.exe"
+    NAME: "go-copy"
   script:
     - echo "Create Release " $TAG
     - echo cat job-windows-amd64.env
@@ -103,8 +103,8 @@ release-windows-amd64:
     description: 'Release $TAG'
     assets:
       links:
-        - name: "$NAME"
-          url: "$URL"
+        - name: $(NAME).exe
+          url: $(URL)
         # - name: go-copy
         #   url: "https://gitlab.com/andrewlader/go-copy/-/jobs/`$JOB_ID`/dist/windows/amd64"
 
