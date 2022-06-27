@@ -103,8 +103,8 @@ release-windows-amd64:
     # - release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \ --assets-link "{\"name\":\"go-copy-windws-amd64.zip\",\"url\":$URL}"
   release:
     name: 'Release $TAG'
-    tag_name: '$TAG'
-    ref: '$TAG'
+    tag_name: 'v$TAG'
+    # ref: '$TAG'
     description: 'Release go-copy version $TAG'
     assets:
       links:
