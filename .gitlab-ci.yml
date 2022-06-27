@@ -28,16 +28,8 @@ build mac amd64:
 build mac arm64:
   stage: build
   script:
-    # - echo $CI_PROJECT_DIR
-    # - rm -rf ~/.cache/go-build
-    # - rm -rf $CI_PROJECT_DIR/pkg
-    # - rm -rf $CI_PROJECT_DIR/bin
-    # - env GOOS=darwin GOARCH=arm64 go build -o go-copy
-    # - go tool dist list
-    # - apk --no-cache --update add build-base
-    # - apk add libc-dev
-    # - env CC="clang" CXX="clang++" GOGCCFLAGS="-fPIC -arch arm64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build531992441=/tmp/go-build -gno-record-gcc-switches" GOOS=darwin GOARCH=arm64 go build
     - env GOOS=darwin GOARCH=arm64 go build
+    - codesign -s - go-copy
   after_script:
     - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
   artifacts:
@@ -93,7 +85,7 @@ release-windows-amd64:
       links:
         - name: "go-copy macos amd64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_AMD64_ID/artifacts/download"
-        - name: "go-copy macos arm64"
+        - name: "go-copy macos arm64 (unsigned)"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_ARM64_ID/artifacts/download"
         - name: "go-copy windows amd64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
