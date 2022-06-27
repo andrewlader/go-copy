@@ -12,10 +12,8 @@ build mac amd64:
   stage: build
   script:
     - env GOOS=darwin GOARCH=amd64 go build -o go-copy
-    # - goos=darwin goarch=amd64 go build
   after_script:
     - echo "JOB_DARWIN_AMD64_ID=$CI_JOB_ID" >> job-darwin-amd64.env
-    - cat job-darwin-amd64.env
   artifacts:
     name: go-copy
     paths:
@@ -31,7 +29,6 @@ build mac arm64:
   stage: build
   script:
     - env GOOS=darwin GOARCH=arm64 go build -o go-copy
-    # - goos=darwin goarch=arm64 go build
   after_script:
     - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
   artifacts:
