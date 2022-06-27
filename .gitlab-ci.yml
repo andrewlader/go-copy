@@ -18,6 +18,7 @@ build mac amd64:
     # - goos=darwin goarch=amd64 go build
   after_script:
     - echo "JOB_DARWIN_AMD64_ID=$CI_JOB_ID" >> job-darwin-amd64.env
+    - cat job-darwin-amd64.env
   artifacts:
     name: go-copy
     paths:
@@ -52,6 +53,7 @@ build windows amd64:
     - goos=windows goarch=amd64 go build -o go-copy.exe
   after_script:
     - echo "JOB_WINDOWS_AMD64_ID=$CI_JOB_ID" >> job-windows-amd64.env
+    - cat job-windoows-amd64.env
   artifacts:
     name: go-copy
     paths:
