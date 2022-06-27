@@ -14,7 +14,7 @@ stages:
 build mac amd64:
   stage: build
   script:
-    - goos=darwin goarch=amd64 go build -o go-copy
+    - GOOSdarwin GOARCH=amd64 go build -o go-copy
     # - goos=darwin goarch=amd64 go build
   after_script:
     - echo "JOB_DARWIN_AMD64_ID=$CI_JOB_ID" >> job-darwin-amd64.env
@@ -33,7 +33,7 @@ build mac amd64:
 build mac arm64:
   stage: build
   script:
-    - goos=darwin goarch=arm64 go build -o go-copy
+    - GOOS=darwin GOARCH=arm64 go build -o go-copy
     # - goos=darwin goarch=arm64 go build
   after_script:
     - echo "JOB_DARWIN_ARM64_ID=$CI_JOB_ID" >> job-darwin-arm64.env
@@ -50,10 +50,9 @@ build mac arm64:
 build windows amd64:
   stage: build
   script:
-    - goos=darwin goarch=amd64 go build -o mac/amd64/go-copy
+    - GOOS=windows GOARCH=amd64 go build -o go-copy.exe
   after_script:
     - echo "JOB_WINDOWS_AMD64_ID=$CI_JOB_ID" >> job-windows-amd64.env
-    - cat job-windoows-amd64.env
   artifacts:
     name: go-copy
     paths:
@@ -81,26 +80,17 @@ release-windows-amd64:
   #     artifacts: true
   variables:
     TAG: '$CI_COMMIT_TAG'
-    URL: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
-    URL2: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_AMD64_ID/artifacts/download"
-    URL3: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_ARM64_ID/artifacts/download"
   script:
     - echo "Create Release " $TAG
-    - echo $URL
-    - echo $URL2
-    - echo $URL3
-    - echo $JOB_DARWIN_AMD64_ID
-    - echo $JOB_DARWIN_ARM64_ID
-    - echo $JOB_WINDOWS_AMD64_ID
   release:
     name: 'Release $TAG'
     tag_name: 'v$TAG'
     description: 'Release go-copy version $TAG'
     assets:
       links:
-        - name: "go-copy darwin amd64"
+        - name: "go-copy macos amd64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_AMD64_ID/artifacts/download"
-        - name: "go-copy darwin arm64"
+        - name: "go-copy macos arm64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_ARM64_ID/artifacts/download"
         - name: "go-copy windows amd64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
