@@ -70,6 +70,8 @@ build windows amd64:
     - echo "JOB_ID=$CI_JOB_ID" >> job-windows-amd64.env
   artifacts:
     name: go-copy
+    paths:
+      - .
     expire_in: never
     reports:
       dotenv: job-windows-amd64.env
