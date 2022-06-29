@@ -1,4 +1,4 @@
-package backup
+package copylib
 
 import (
 	"fmt"
