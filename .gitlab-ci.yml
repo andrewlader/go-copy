@@ -1,4 +1,7 @@
-image: golang:1.18
+image: golang:1.17
+variables:
+  PACKAGE_VERSION: 0.0.5
+  CI_COMMIT_TAG: ${PACKAGE_VERSION}
 
 # Section for General Commits
 
@@ -11,14 +14,18 @@ build on commit:
   stage: build
   script:
     - echo "Is commit tag null?"
-    - echo $CI_COMMIT_TAG == null
+    - echo $TAG
     - echo "Is commit tag empty?"
-    - echo $CI_COMMIT_TAG == ""
+    - echo $TAG
     - echo "Building go-copy..."
     - go build
   rules:
-    - if: ($CI_COMMIT_TAG == "" || $CI_COMMIT_TAG == null)
-
+    - if: ($CI_COMMIT_TAG == "")
+      variables:
+        TAG: "Empty"
+    - if: ($CI_COMMIT_TAG == null)
+      variables:
+        TAG: "Null"
 test on commit:
   stage: test
   script:
