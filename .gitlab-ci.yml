@@ -1,21 +1,15 @@
 image: golang:1.18
 
+##########
 # Section for General Commits
+##########
 
 stages:
   - build
   - test
   - release
 
-# build on commit:
-#   stage: build
-#   script:
-#     - echo "Building go-copy..."
-#     - go build
-#   rules:
-#     - if: ($CI_COMMIT_TAG == "" || $CI_COMMIT_TAG == null)
-
-test on commit:
+unit testing on commit:
   stage: test
   script:
     - echo "Testing go-copy..."
@@ -23,12 +17,14 @@ test on commit:
   rules:
     - if: ($CI_COMMIT_TAG == "" || $CI_COMMIT_TAG == null)
 
-# sast:
+# sast testing:
 #   stage: test
 # include:
 # - template: Security/SAST.gitlab-ci.yml
 
+##########
 # Section for Creating Release Builds for New Tag
+##########
 
 build mac amd64:
   stage: build
