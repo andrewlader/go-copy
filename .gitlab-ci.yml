@@ -14,18 +14,18 @@ build on commit:
   stage: build
   script:
     - echo "Is commit tag null?"
-    - echo $TAG
+    - echo $TAG_VALUE
     - echo "Is commit tag empty?"
-    - echo $TAG
+    - echo $TAG_VALUE
     - echo "Building go-copy..."
     - go build
   rules:
     - if: ($CI_COMMIT_TAG == "")
       variables:
-        TAG: "Empty"
+        TAG_VALUE: "Empty"
     - if: ($CI_COMMIT_TAG == null)
       variables:
-        TAG: "Null"
+        TAG_VALUE: "Null"
 test on commit:
   stage: test
   script:
@@ -89,17 +89,15 @@ build windows amd64:
   rules:
     - if: $CI_COMMIT_TAG
 
-release-windows-amd64:
+create release with artifacts:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  variables:
-    TAG: '$CI_COMMIT_TAG'
   script:
-    - echo "Create Release " $TAG
+    - echo "Create Release " $CI_COMMIT_TAG
   release:
-    name: 'Release $TAG'
-    tag_name: 'v$TAG'
-    description: 'Release go-copy version $TAG'
+    name: 'Release $CI_COMMIT_TAG'
+    tag_name: 'v$CI_COMMIT_TAG'
+    description: 'Release go-copy version $CI_COMMIT_TAG'
     assets:
       links:
         - name: "go-copy macos amd64"
