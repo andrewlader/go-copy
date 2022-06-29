@@ -1,7 +1,4 @@
-image: golang:1.17
-variables:
-  PACKAGE_VERSION: 0.0.5
-  CI_COMMIT_TAG: ${PACKAGE_VERSION}
+image: golang:1.18
 
 # Section for General Commits
 
