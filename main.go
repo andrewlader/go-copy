@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
-	"gitlab.com/andrewlader/go-copy/backup"
+	"gitlab.com/andrewlader/go-copy/copylib"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -33,22 +33,22 @@ func main() {
 	defer handleExit()
 
 	if len(operation) < 1 {
-		backup.PrintError("the operation flag is required; it defines which operation in the config to execute...")
+		copylib.PrintError("the operation flag is required; it defines which operation in the config to execute...")
 		os.Exit(2)
 	}
 
-	runner := backup.NewRunner(operation)
-	go runner.Copy()
+	copyRunner := copylib.NewRunner(operation)
+	go copyRunner.Copy()
 
-	runner.Waiter.Wait()
+	copyRunner.Waiter.Wait()
 
 	stats := color.New(color.FgBlue, color.Bold)
-	backup.PrintColor(stats, "\nStats:")
-	backup.PrintStats("    Files Copied: ", fmt.Sprintf("%d", runner.Stats.FilesCopied))
+	copylib.PrintColor(stats, "\nStats:")
+	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
 	printer := message.NewPrinter(language.English)
-	backup.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", runner.Stats.FilesCopied))
-	backup.PrintStats("    Files Copied: ", printer.Sprintf("%d", runner.Stats.BytesCopied))
-	backup.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", runner.Stats.TimeToCopy.Seconds()))
+	copylib.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
+	copylib.PrintStats("    Files Copied: ", printer.Sprintf("%d", copyRunner.Stats.BytesCopied))
+	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyRunner.Stats.TimeToCopy.Seconds()))
 	color.White("\nAll done...\n\n")
 }
 
@@ -62,8 +62,8 @@ func handleExit() {
 	recovery := recover()
 	if recovery != nil {
 		errOutput := fmt.Sprintf("panic occurred:\n    %v", recovery)
-		backup.PrintError(errOutput)
-		backup.PrintError("exiting...")
+		copylib.PrintError(errOutput)
+		copylib.PrintError("exiting...")
 
 		os.Exit(1)
 	}
