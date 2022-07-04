@@ -37,18 +37,18 @@ func main() {
 		os.Exit(2)
 	}
 
-	runner := copylib.NewRunner(operation)
-	go runner.Copy()
+	copyRunner := copylib.NewRunner(operation)
+	go copyRunner.Copy()
 
-	runner.Waiter.Wait()
+	copyRunner.Waiter.Wait()
 
 	stats := color.New(color.FgBlue, color.Bold)
 	copylib.PrintColor(stats, "\nStats:")
-	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", runner.Stats.FilesCopied))
+	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
 	printer := message.NewPrinter(language.English)
-	copylib.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", runner.Stats.FilesCopied))
-	copylib.PrintStats("    Files Copied: ", printer.Sprintf("%d", runner.Stats.BytesCopied))
-	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", runner.Stats.TimeToCopy.Seconds()))
+	copylib.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
+	copylib.PrintStats("    Files Copied: ", printer.Sprintf("%d", copyRunner.Stats.BytesCopied))
+	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyRunner.Stats.TimeToCopy.Seconds()))
 	color.White("\nAll done...\n\n")
 }
 

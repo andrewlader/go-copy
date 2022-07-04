@@ -1,0 +1,7 @@
+test:
+  name: Test Number 1
+  source: C:\test\src
+  destinations:
+    - C:\test\dst
+    - D:\test\dst
+  replace: true
