@@ -13,6 +13,7 @@ import (
 )
 
 var operation string
+var pauseAtEnd bool
 
 func init() {
 	defer handleExit()
@@ -44,18 +45,29 @@ func main() {
 
 	stats := color.New(color.FgBlue, color.Bold)
 	copylib.PrintColor(stats, "\nStats:")
+	copylib.PrintStats("    Files Skipped: ", fmt.Sprintf("%d", copyRunner.Stats.FilesSkipped))
 	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
 	printer := message.NewPrinter(language.English)
 	copylib.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
 	copylib.PrintStats("    Files Copied: ", printer.Sprintf("%d", copyRunner.Stats.BytesCopied))
 	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyRunner.Stats.TimeToCopy.Seconds()))
 	color.White("\nAll done...\n\n")
+
+	if pauseAtEnd {
+		pauseOutput()
+	}
 }
 
 func parseArguments() {
 	flag.StringVar(&operation, "operation", "", "defines the operation to execute (required)")
+	flag.BoolVar(&pauseAtEnd, "pause", false, "determines if the app will pause before ending (optional)")
 
 	flag.Parse()
+}
+
+func pauseOutput() {
+	copylib.Print("Press enter to continue...")
+	fmt.Scanln()
 }
 
 func handleExit() {

@@ -18,9 +18,10 @@ type copyContext struct {
 }
 
 type stats struct {
-	FilesCopied int
-	BytesCopied int64
-	TimeToCopy  time.Duration
+	FilesSkipped int
+	FilesCopied  int
+	BytesCopied  int64
+	TimeToCopy   time.Duration
 }
 
 type fileCopier struct {
@@ -58,6 +59,7 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 				context.filename = file.Name()
 				err := fileCopier.copyFileToDestinations(context)
 				if err != nil {
+					fileCopier.stats.FilesSkipped++
 					PrintError(fmt.Sprintf("failed to copy file \"%s\" due to error: %s", file.Name(), err))
 				}
 			}
