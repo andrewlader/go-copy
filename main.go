@@ -48,8 +48,7 @@ func main() {
 	copylib.PrintStats("    Files Skipped: ", fmt.Sprintf("%d", copyRunner.Stats.FilesSkipped))
 	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
 	printer := message.NewPrinter(language.English)
-	copylib.PrintStats("    Bytes Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
-	copylib.PrintStats("    Files Copied: ", printer.Sprintf("%d", copyRunner.Stats.BytesCopied))
+	copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyRunner.Stats.BytesCopied))
 	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyRunner.Stats.TimeToCopy.Seconds()))
 	color.White("\nAll done...\n\n")
 
