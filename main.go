@@ -14,9 +14,12 @@ import (
 
 var operation string
 var pauseAtEnd bool
+var finishedSuccessfully bool
 
 func init() {
 	defer handleExit()
+
+	finishedSuccessfully = false
 
 	parseArguments()
 
@@ -34,23 +37,24 @@ func main() {
 	defer handleExit()
 
 	if len(operation) < 1 {
-		copylib.PrintError("the operation flag is required; it defines which operation in the config to execute...")
-		os.Exit(2)
+		panic("the operation flag is required; it defines which operation in the config to execute...")
 	}
 
-	copyRunner := copylib.NewRunner(operation)
-	go copyRunner.Copy()
+	copyFileRunner := copylib.NewRunner(operation)
+	go copyFileRunner.Copy()
 
-	copyRunner.Waiter.Wait()
+	copyFileRunner.Waiter.Wait()
 
 	stats := color.New(color.FgBlue, color.Bold)
 	copylib.PrintColor(stats, "\nStats:")
-	copylib.PrintStats("    Files Skipped: ", fmt.Sprintf("%d", copyRunner.Stats.FilesSkipped))
-	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", copyRunner.Stats.FilesCopied))
+	copylib.PrintStats("    Files Skipped: ", fmt.Sprintf("%d", copyFileRunner.Stats.FilesSkipped))
+	copylib.PrintStats("    Files Copied: ", fmt.Sprintf("%d", copyFileRunner.Stats.FilesCopied))
 	printer := message.NewPrinter(language.English)
-	copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyRunner.Stats.BytesCopied))
-	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyRunner.Stats.TimeToCopy.Seconds()))
+	copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
+	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
 	color.White("\nAll done...\n\n")
+
+	finishedSuccessfully = true
 
 	if pauseAtEnd {
 		pauseOutput()
@@ -74,8 +78,10 @@ func handleExit() {
 	if recovery != nil {
 		errOutput := fmt.Sprintf("panic occurred:\n    %v", recovery)
 		copylib.PrintError(errOutput)
-		copylib.PrintError("exiting...")
+		copylib.PrintError("go-copy has stopped with an error")
 
 		os.Exit(1)
+	} else if finishedSuccessfully {
+		copylib.PrintError("go-copy has completed its job successfully")
 	}
 }
