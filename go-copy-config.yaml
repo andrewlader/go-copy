@@ -1,7 +1,7 @@
 test:
   name: Test
-  source: C:\test\src
+  source: ../go-copy-testing-ground/source
   destinations:
-    - C:\test\dst
-    - D:\test\dst
-  replace: true
+    - ../go-copy-testing-ground/destinationOne
+    - ../go-copy-testing-ground/destinationTwo
+  replace: false
