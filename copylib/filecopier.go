@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 	"time"
 )
 
@@ -80,7 +79,7 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 
 		// make sure all the sub folders exist for this destination path
 		destinationPath := path.Join(context.destinationPath, context.subFolderPath)
-		err = fileCopier.createSubFolders(context, destinationPath)
+		err = os.MkdirAll(destinationPath, os.ModeDir)
 		if err != nil {
 			// failed to create the sub-folder(s), so skip this path and continue
 			continue
@@ -157,30 +156,6 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	fileCopier.stats.BytesCopied += bytesWritten
 
 	return nil
-}
-
-func (fileCopier *fileCopier) createSubFolders(context *copyContext, destinationPath string) error {
-	var err error
-
-	if _, err := os.Stat(destinationPath); os.IsNotExist(err) {
-		// some sub folders may exist already, so this will step down through each
-		// sub folder and see if it needs to be created, and then move on to the
-		// next child folder
-		subPaths := strings.Split(context.subFolderPath, "/")
-		newDir := context.destinationPath
-		for _, subPath := range subPaths {
-			newDir = path.Join(newDir, subPath)
-			if _, err := os.Stat(newDir); os.IsNotExist(err) {
-				err = os.Mkdir(newDir, os.ModeDir)
-				if err != nil {
-					PrintError(fmt.Sprintf("failed to create sub-path: %s", newDir))
-					break
-				}
-			}
-		}
-	}
-
-	return err
 }
 
 func (fileCopier *fileCopier) doesDestFileExist(destFilename string) bool {
