@@ -104,21 +104,21 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	sourceFilename := path.Join(fileCopier.config.source, context.subFolderPath, context.filename)
 	destFilename := path.Join(destinationPath, context.filename)
 
-	// check to see if the file exists, and if it does,
-	// then check the configuration to see if it should be replaced
-	if fileCopier.doesDestFileExist(destFilename) && !fileCopier.config.replace {
-		fileCopier.stats.TotalFilesSkipped++
-		warningMsg := fmt.Sprintf("%s was not copied to %s as it already exists, and the replace flag is set to false",
-			context.filename, context.destinationPath)
-		PrintWarning(warningMsg)
-		return nil
-	}
-
-	sourceFileStat, err := os.Stat(sourceFilename)
+	fileinfoSource, err := os.Stat(sourceFilename)
 	if err != nil {
 		return err
-	} else if !sourceFileStat.Mode().IsRegular() {
+	} else if !fileinfoSource.Mode().IsRegular() {
 		return fmt.Errorf("%s was not copied as it is not a regular file", sourceFilename)
+	}
+
+	// check to see if the file exists, and if it does,
+	// then check the configuration to see if it should be replaced
+	fileinfoDest, fileExists := fileCopier.doesDestFileExist(destFilename)
+	if fileExists {
+		if !fileCopier.checkIfFileShouldBeReplaced(context, fileinfoSource, fileinfoDest) {
+			// the file should not be replaced
+			return nil
+		}
 	}
 
 	sourceFile, err := os.Open(sourceFilename)
@@ -147,7 +147,7 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	destFile.Close()
 
 	// update the access and modified time for the file to be that of the original file
-	err = os.Chtimes(destFilename, sourceFileStat.ModTime(), sourceFileStat.ModTime())
+	err = os.Chtimes(destFilename, fileinfoSource.ModTime(), fileinfoSource.ModTime())
 	if err != nil {
 		PrintError(fmt.Sprintf("failed to changed modified time: %s", err))
 	}
@@ -158,10 +158,10 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	return nil
 }
 
-func (fileCopier *fileCopier) doesDestFileExist(destFilename string) bool {
+func (fileCopier *fileCopier) doesDestFileExist(destFilename string) (os.FileInfo, bool) {
 	var fileExists = false
 
-	_, err := os.Stat(destFilename)
+	fileinfoDest, err := os.Stat(destFilename)
 	if err == nil {
 		fileExists = true
 	} else if err != nil {
@@ -170,7 +170,33 @@ func (fileCopier *fileCopier) doesDestFileExist(destFilename string) bool {
 		}
 	}
 
-	return fileExists
+	return fileinfoDest, fileExists
+}
+
+func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, fileinfoSource os.FileInfo, fileinfoDest os.FileInfo) bool {
+	returnValue := true
+
+	switch fileCopier.config.replace {
+	case replaceNever:
+		fileCopier.stats.TotalFilesSkipped++
+		warningMsg := fmt.Sprintf("%s was not copied to %s as it already exists, and the replace flag is set to \"never\"",
+			context.filename, context.destinationPath)
+		PrintWarning(warningMsg)
+		returnValue = false
+		break
+
+	case replaceSkipIfSame:
+		if (fileinfoSource.ModTime() == fileinfoDest.ModTime()) && (fileinfoSource.Size() == fileinfoDest.Size()) {
+			fileCopier.stats.TotalFilesSkipped++
+			warningMsg := fmt.Sprintf("%s was not copied to %s because it matches the datetime and size of an existing file, and the replace flag is set to \"skip\"",
+				context.filename, context.destinationPath)
+			PrintWarning(warningMsg)
+			returnValue = false
+		}
+		break
+	}
+
+	return returnValue
 }
 
 func (fileCopier *fileCopier) handleFinish() {
