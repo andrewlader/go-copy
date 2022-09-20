@@ -1,14 +1,24 @@
 package copylib
 
 import (
+	"strings"
+
 	"github.com/spf13/viper"
+)
+
+type replaceMode int8
+
+const (
+	replaceNever replaceMode = iota
+	replaceSkipIfSame
+	replaceAlways
 )
 
 type configuration struct {
 	name         string
 	source       string
 	destinations []string
-	replace      bool
+	replace      replaceMode
 }
 
 func getConfiguration(key string) *configuration {
@@ -25,7 +35,18 @@ func getConfiguration(key string) *configuration {
 		name:         config["name"].(string),
 		source:       config["source"].(string),
 		destinations: destinations,
-		replace:      config["replace"].(bool),
+	}
+
+	switch strings.ToLower(config["replace"].(string)) {
+	case "always":
+		configObj.replace = replaceAlways
+		break
+	case "never":
+		configObj.replace = replaceNever
+		break
+	case "skip":
+		configObj.replace = replaceSkipIfSame
+		break
 	}
 
 	return configObj

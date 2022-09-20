@@ -4,4 +4,4 @@ test:
   destinations:
     - ../go-copy-testing-ground/destinationOne
     - ../go-copy-testing-ground/destinationTwo
-  replace: false
+  replace: always
