@@ -5,6 +5,7 @@ run:
 
 install:
 	go install cmd/main.go
+	mv ${GOPATH}/bin/main ${GOPATH}/bin/go-copy
 
 build:
 	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} cmd/main.go
