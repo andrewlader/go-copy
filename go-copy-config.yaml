@@ -1,7 +1,0 @@
-test:
-  name: Test
-  source: ../go-copy-testing-ground/source
-  destinations:
-    - ../go-copy-testing-ground/destinationOne
-    - ../go-copy-testing-ground/destinationTwo
-  replace: always
