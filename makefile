@@ -1,14 +1,13 @@
 BINARY_NAME=go-copy
 
 run:
-	go run cmd/main.go
+	go run cmd/go-copy/main.go
 
 install:
-	go install cmd/main.go
-	mv ${GOPATH}/bin/main ${GOPATH}/bin/go-copy
+	go install ./cmd/go-copy
 
 build:
-	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} cmd/main.go
+	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} cmd/go-copy/main.go
 
 run_build:
 	./${BINARY_NAME}
