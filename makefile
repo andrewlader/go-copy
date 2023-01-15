@@ -3,6 +3,10 @@ BINARY_NAME=go-copy
 run:
 	go run cmd/go-copy/main.go
 
+test:
+	cd configs
+	go run cmd/go-copy/main.go -operation test -pause
+
 install:
 	go install ./cmd/go-copy
 
