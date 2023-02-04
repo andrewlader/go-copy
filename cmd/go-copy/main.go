@@ -15,6 +15,10 @@ import (
 var operation string
 var pauseAtEnd bool
 var finishedSuccessfully bool
+var logModeSilent bool
+var logModeSimple bool
+var logModeVerbose bool
+var logMode copylib.LogMode
 
 func init() {
 	defer handleExit()
@@ -43,7 +47,7 @@ func main() {
 		panic("the operation flag is required; it defines which operation in the config to execute...")
 	}
 
-	copyFileRunner := copylib.NewRunner(operation)
+	copyFileRunner := copylib.NewRunner(operation, logMode)
 	go copyFileRunner.Copy()
 
 	copyFileRunner.Waiter.Wait()
@@ -69,8 +73,19 @@ func main() {
 func parseArguments() {
 	flag.StringVar(&operation, "operation", "", "defines the operation to execute (required)")
 	flag.BoolVar(&pauseAtEnd, "pause", false, "determines if the app will pause before ending (optional)")
+	flag.BoolVar(&logModeSilent, "silent", false, "logging out put will be sparse (optional)")
+	flag.BoolVar(&logModeSimple, "simple", false, "logging out put will be normal (optional)")
+	flag.BoolVar(&logModeVerbose, "verbose", false, "logging out put will be verbose (optional)")
 
 	flag.Parse()
+
+	if logModeSilent {
+		logMode = copylib.LogSilent
+	} else if logModeSimple {
+		logMode = copylib.LogSimple
+	} else if logModeVerbose {
+		logMode = copylib.LogVerbose
+	}
 }
 
 func pauseOutput() {
