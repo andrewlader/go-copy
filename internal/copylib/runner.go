@@ -5,6 +5,16 @@ import (
 	"sync"
 )
 
+type LogMode int8
+
+const (
+	LogSilent LogMode = iota
+	LogSimple
+	LogVerbose
+)
+
+var currentLogMode = LogSilent
+
 const lineLength = 80
 
 type Runner struct {
@@ -14,7 +24,7 @@ type Runner struct {
 	Stats      *stats
 }
 
-func NewRunner(configName string) *Runner {
+func NewRunner(configName string, logMode LogMode) *Runner {
 	runner := &Runner{
 		configName: configName,
 	}
@@ -23,6 +33,9 @@ func NewRunner(configName string) *Runner {
 
 	runner.config = config
 	runner.Waiter.Add(1)
+
+	// set the current logging mode to what the user chose
+	currentLogMode = logMode
 
 	return runner
 }

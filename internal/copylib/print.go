@@ -5,11 +5,15 @@ import (
 )
 
 func Print(formattedString string) {
-	color.Green("%s%s", color.GreenString("go-copy: "), color.WhiteString(formattedString))
+	if currentLogMode != LogSilent {
+		color.Green("%s%s", color.GreenString("go-copy: "), color.WhiteString(formattedString))
+	}
 }
 
 func PrintWarning(formattedString string) {
-	color.Yellow("%s%s", color.YellowString("go-copy: "), color.MagentaString(formattedString))
+	if currentLogMode == LogVerbose {
+		color.Yellow("%s%s", color.YellowString("go-copy: "), color.MagentaString(formattedString))
+	}
 }
 
 func PrintError(formattedString string) {
