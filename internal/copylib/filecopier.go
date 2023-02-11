@@ -94,11 +94,11 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 	}
 
 	if count == 0 {
-		Print(fmt.Sprintf("file \"%s\" was skipped", context.filename))
+		PrintWarning(fmt.Sprintf("file \"%s\" was skipped", context.filename))
 	} else if count == len(fileCopier.config.destinations) {
 		Print(fmt.Sprintf("copied file \"%s\"", context.filename))
 	} else {
-		Print(fmt.Sprintf("file \"%s\" was copied to some of the destinations, but not all", context.filename))
+		Print(fmt.Sprintf("file \"%s\" was copied to some of the destinations, but not all of them", context.filename))
 	}
 
 	fileCopier.stats.NumberOfSourceFiles++
