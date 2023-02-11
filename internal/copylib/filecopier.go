@@ -71,8 +71,8 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 
 func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 	var err error
-
-	Print(fmt.Sprintf("copying file \"%s\"", context.filename))
+	var count = 0
+	var ok bool
 
 	for _, destPath := range fileCopier.config.destinations {
 		context.destinationPath = destPath
@@ -85,10 +85,20 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 			continue
 		}
 
-		err = fileCopier.copyFile(context, destinationPath)
+		ok, err = fileCopier.copyFile(context, destinationPath)
 		if err != nil {
 			PrintError(fmt.Sprintf("error copying file %s: %s", context.filename, err))
+		} else if ok {
+			count++
 		}
+	}
+
+	if count == 0 {
+		Print(fmt.Sprintf("file \"%s\" was skipped", context.filename))
+	} else if count == len(fileCopier.config.destinations) {
+		Print(fmt.Sprintf("copied file \"%s\"", context.filename))
+	} else {
+		Print(fmt.Sprintf("file \"%s\" was copied to some of the destinations, but not all", context.filename))
 	}
 
 	fileCopier.stats.NumberOfSourceFiles++
@@ -96,7 +106,7 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 	return
 }
 
-func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath string) error {
+func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath string) (bool, error) {
 	var err error
 
 	// *** this is the main focus of this entire Go program, copying files to specific destinations ***
@@ -106,9 +116,9 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 
 	fileinfoSource, err := os.Stat(sourceFilename)
 	if err != nil {
-		return err
+		return false, err
 	} else if !fileinfoSource.Mode().IsRegular() {
-		return fmt.Errorf("%s was not copied as it is not a regular file", sourceFilename)
+		return false, fmt.Errorf("%s was not copied as it is not a regular file", sourceFilename)
 	}
 
 	// check to see if the file exists, and if it does,
@@ -117,32 +127,32 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	if fileExists {
 		if !fileCopier.checkIfFileShouldBeReplaced(context, fileinfoSource, fileinfoDest) {
 			// the file should not be replaced
-			return nil
+			return false, nil
 		}
 	}
 
 	sourceFile, err := os.Open(sourceFilename)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer sourceFile.Close()
 
 	destFile, err := os.Create(destFilename)
 	if err != nil {
 		PrintError(fmt.Sprintf("error creating %s: %s", destFilename, err))
-		return err
+		return false, err
 	}
 	defer destFile.Close()
 
 	bytesWritten, err := io.Copy(destFile, sourceFile)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	// flush file to storage and close it BEFORE changing the modified time of the file
 	err = destFile.Sync()
 	if err != nil {
-		return err
+		return false, err
 	}
 	destFile.Close()
 
@@ -155,7 +165,7 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	fileCopier.stats.TotalFilesCopied++
 	fileCopier.stats.BytesCopied += bytesWritten
 
-	return nil
+	return true, nil
 }
 
 func (fileCopier *fileCopier) doesDestFileExist(destFilename string) (os.FileInfo, bool) {
