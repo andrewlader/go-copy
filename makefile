@@ -1,17 +1,17 @@
 BINARY_NAME=go-copy
 
 run:
-	go run cmd/go-copy/go-copy.go
+	go run cmd/${BINARY_NAME}/${BINARY_NAME}.go
 
 test:
 	cd configs
-	go run cmd/go-copy/go-copy.go -operation test -pause
+	go run cmd/${BINARY_NAME}/${BINARY_NAME}.go -operation test -pause
 
 install:
-	go install ./cmd/go-copy
+	go install ./cmd/${BINARY_NAME}
 
 build:
-	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} cmd/go-copy/go-copy.go
+	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} cmd/${BINARY_NAME}/${BINARY_NAME}.go
 
 run_build:
 	./${BINARY_NAME}
