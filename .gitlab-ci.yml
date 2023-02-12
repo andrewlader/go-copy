@@ -59,6 +59,22 @@ build mac arm64:
   rules:
     - if: $CI_COMMIT_TAG
 
+build linux arm64:
+  stage: build
+  script:
+    - env GOOS=linux GOARCH=arm64 go build cmd/go-copy/go-copy.go
+  after_script:
+    - echo "JOB_LINUX_ARM64_ID=$CI_JOB_ID" >> job-linux-arm64.env
+  artifacts:
+    name: go-copy
+    paths:
+      - ./go-copy
+    expire_in: never
+    reports:
+      dotenv: job-linux-arm64.env
+  rules:
+    - if: $CI_COMMIT_TAG
+
 build windows amd64:
   stage: build
   script:
@@ -92,5 +108,7 @@ create release with artifacts:
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_DARWIN_ARM64_ID/artifacts/download"
         - name: "go-copy windows amd64"
           url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_WINDOWS_AMD64_ID/artifacts/download"
+        - name: "go-copy linux amd64"
+          url: "https://gitlab.com/andrewlader/go-copy/-/jobs/$JOB_LINUX_AMD64_ID/artifacts/download"
   rules:
     - if: $CI_COMMIT_TAG
