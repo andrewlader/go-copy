@@ -10,6 +10,10 @@ func Print(formattedString string) {
 	}
 }
 
+func PrintVersionInfo(stringOne string, stringTwo string) {
+	color.Green("%s%s", color.CyanString(stringOne), color.MagentaString(stringTwo))
+}
+
 func PrintWarning(formattedString string) {
 	if currentLogMode == LogVerbose {
 		color.Yellow("%s%s", color.YellowString("go-copy: "), color.MagentaString(formattedString))

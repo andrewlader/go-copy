@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
+
+	_ "embed"
 
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
@@ -12,6 +15,10 @@ import (
 	"golang.org/x/text/message"
 )
 
+//go:embed git-describe.txt
+var buildInfo string
+
+var displayBuildInformation bool
 var operation string
 var pauseAtEnd bool
 var finishedSuccessfully bool
@@ -43,34 +50,48 @@ func init() {
 func main() {
 	defer handleExit()
 
-	if len(operation) < 1 {
-		panic("the operation flag is required; it defines which operation in the config to execute...")
-	}
+	if displayBuildInformation {
+		buildInformation := strings.Split(buildInfo, "\n")
+		if len(buildInformation) > 0 {
+			copylib.PrintVersionInfo("go-copy version: ", buildInformation[0])
+		}
+		if len(buildInformation) > 1 {
+			copylib.PrintVersionInfo("go version:      ", buildInformation[1])
+		}
+		if len(buildInformation) > 2 {
+			copylib.PrintVersionInfo("build date:      ", buildInformation[2])
+		}
+	} else {
+		if len(operation) < 1 {
+			panic("the operation flag is required; it defines which operation in the config to execute...")
+		}
 
-	copyFileRunner := copylib.NewRunner(operation, logMode)
-	go copyFileRunner.Copy()
+		copyFileRunner := copylib.NewRunner(operation, logMode)
+		go copyFileRunner.Copy()
 
-	copyFileRunner.Waiter.Wait()
+		copyFileRunner.Waiter.Wait()
 
-	stats := color.New(color.FgBlue, color.Bold)
-	copylib.PrintColor(stats, "\nStats:")
-	copylib.PrintStats("    Number of Source Files: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfSourceFiles))
-	copylib.PrintStats("    Number of Destinations: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfDestinations))
-	copylib.PrintStats("    Total Files Skipped: ", fmt.Sprintf("%d", copyFileRunner.Stats.TotalFilesSkipped))
-	copylib.PrintStats("    Total Files Copied: ", fmt.Sprintf("%d", copyFileRunner.Stats.TotalFilesCopied))
-	printer := message.NewPrinter(language.English)
-	copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
-	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
-	color.White("\nAll done...\n\n")
+		stats := color.New(color.FgBlue, color.Bold)
+		copylib.PrintColor(stats, "\nStats:")
+		copylib.PrintStats("    Number of Source Files: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfSourceFiles))
+		copylib.PrintStats("    Number of Destinations: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfDestinations))
+		copylib.PrintStats("    Total Files Skipped: ", fmt.Sprintf("%d", copyFileRunner.Stats.TotalFilesSkipped))
+		copylib.PrintStats("    Total Files Copied: ", fmt.Sprintf("%d", copyFileRunner.Stats.TotalFilesCopied))
+		printer := message.NewPrinter(language.English)
+		copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
+		copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
+		color.White("\nAll done...\n\n")
 
-	finishedSuccessfully = true
+		finishedSuccessfully = true
 
-	if pauseAtEnd {
-		pauseOutput()
+		if pauseAtEnd {
+			pauseOutput()
+		}
 	}
 }
 
 func parseArguments() {
+	flag.BoolVar(&displayBuildInformation, "version", false, "display build & version information")
 	flag.StringVar(&operation, "operation", "", "defines the operation to execute (required)")
 	flag.BoolVar(&pauseAtEnd, "pause", false, "determines if the app will pause before ending (optional)")
 	flag.BoolVar(&logModeSilent, "silent", false, "logging out put will be sparse (optional)")
