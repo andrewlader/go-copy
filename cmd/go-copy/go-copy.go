@@ -5,12 +5,19 @@ import (
 	"fmt"
 	"os"
 
+	_ "embed"
+
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
 	"gitlab.com/andrewlader/go-copy/internal/copylib"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
+
+//go:embed git-describe.txt
+var thisVersion string
+var goVersion string
+var buildDate string
 
 var operation string
 var pauseAtEnd bool
@@ -42,6 +49,10 @@ func init() {
 
 func main() {
 	defer handleExit()
+
+	print(thisVersion)
+	print(goVersion)
+	print(buildDate)
 
 	if len(operation) < 1 {
 		panic("the operation flag is required; it defines which operation in the config to execute...")
