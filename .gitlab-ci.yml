@@ -64,7 +64,7 @@ build linux amd64:
   script:
     - env GOOS=linux GOARCH=amd64 go build cmd/go-copy/go-copy.go
   after_script:
-    - echo "JOB_LINUX_AMD64_ID=$CI_JOB_ID" >> job-linux-arm64.env
+    - echo "JOB_LINUX_AMD64_ID=$CI_JOB_ID" >> job-linux-amd64.env
   artifacts:
     name: go-copy
     paths:
