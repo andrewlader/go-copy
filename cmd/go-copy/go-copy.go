@@ -34,15 +34,15 @@ func init() {
 
 	parseArguments()
 
-	viper.SetConfigName("go-copy-config") // name of config file (without extension)
-	viper.SetConfigType("yml")            // REQUIRED if the config file does not have the extension in the name
-	viper.SetConfigType("yaml")           // REQUIRED if the config file does not have the extension in the name
-	viper.AddConfigPath(".")              // path to look for the config file in
-	viper.AddConfigPath("cmd/")           // path to look for the config file in
-	viper.AddConfigPath("config/")        // path to look for the config file in
-	viper.AddConfigPath("configs/")       // path to look for the config file in
-	err := viper.ReadInConfig()           // Find and read the config file
-	if err != nil {                       // Handle errors reading the config file
+	viper.SetConfigName("go-copy-config")           // name of config file (without extension)
+	viper.SetConfigType("yml")                      // REQUIRED if the config file does not have the extension in the name
+	viper.SetConfigType("yaml")                     // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath(".")                        // path to look for the config file in
+	viper.AddConfigPath("cmd/")                     // path to look for the config file in
+	viper.AddConfigPath("config/")                  // path to look for the config file in
+	viper.AddConfigPath("configs/")                 // path to look for the config file in
+	err := viper.ReadInConfig()                     // Find and read the config file
+	if (!displayBuildInformation) && (err != nil) { // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error processing config file: %s", err))
 	}
 }
