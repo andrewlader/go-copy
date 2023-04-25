@@ -2,10 +2,9 @@ package copylib
 
 import (
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"path"
+	"runtime/debug"
 	"time"
 )
 
@@ -42,8 +41,6 @@ func (fileCopier *fileCopier) run(config *configuration) {
 }
 
 func (fileCopier *fileCopier) walkPath(pathToWalk string) {
-	var file os.FileInfo
-
 	context := &copyContext{
 		sourcePath:    fileCopier.config.source,
 		subFolderPath: pathToWalk,
@@ -51,12 +48,13 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 
 	currentPath := path.Join(fileCopier.config.source, context.subFolderPath)
 
-	files, err := ioutil.ReadDir(currentPath)
+	files, err := ReadDir(currentPath)
 	if err != nil {
 		PrintWarning(fmt.Sprintf("skipping path %s: %v", currentPath, err))
 	} else {
-		for _, file = range files {
-			if file.Mode().IsRegular() {
+		for _, file := range files {
+
+			if file.Type().IsRegular() {
 				// copy the file
 				context.filename = file.Name()
 				fileCopier.copyFileToDestinations(context)
@@ -79,7 +77,7 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 
 		// make sure all the sub folders exist for this destination path
 		destinationPath := path.Join(context.destinationPath, context.subFolderPath)
-		err = os.MkdirAll(destinationPath, os.ModeDir)
+		err = MkdirAll(destinationPath, os.ModeDir)
 		if err != nil {
 			// failed to create the sub-folder(s), so skip this path and continue
 			continue
@@ -102,8 +100,6 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 	}
 
 	fileCopier.stats.NumberOfSourceFiles++
-
-	return
 }
 
 func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath string) (bool, error) {
@@ -114,13 +110,12 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	sourceFilename := path.Join(fileCopier.config.source, context.subFolderPath, context.filename)
 	destFilename := path.Join(destinationPath, context.filename)
 
-	fileinfoSource, err := os.Stat(sourceFilename)
+	fileinfoSource, err := Stat(sourceFilename)
 	if err != nil {
 		return false, err
 	} else if !fileinfoSource.Mode().IsRegular() {
 		return false, fmt.Errorf("%s was not copied as it is not a regular file", sourceFilename)
 	}
-
 	// check to see if the file exists, and if it does,
 	// then check the configuration to see if it should be replaced
 	fileinfoDest, fileExists := fileCopier.doesDestFileExist(destFilename)
@@ -131,33 +126,33 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 		}
 	}
 
-	sourceFile, err := os.Open(sourceFilename)
+	sourceFile, err := Open(sourceFilename)
 	if err != nil {
 		return false, err
 	}
-	defer sourceFile.Close()
+	defer Close(sourceFile)
 
-	destFile, err := os.Create(destFilename)
+	destFile, err := Create(destFilename)
 	if err != nil {
 		PrintError(fmt.Sprintf("error creating %s: %s", destFilename, err))
 		return false, err
 	}
-	defer destFile.Close()
+	defer Close(destFile)
 
-	bytesWritten, err := io.Copy(destFile, sourceFile)
+	bytesWritten, err := Copy(destFile, sourceFile)
 	if err != nil {
 		return false, err
 	}
 
 	// flush file to storage and close it BEFORE changing the modified time of the file
-	err = destFile.Sync()
+	err = Sync(destFile)
 	if err != nil {
 		return false, err
 	}
-	destFile.Close()
+	Close(destFile)
 
 	// update the access and modified time for the file to be that of the original file
-	err = os.Chtimes(destFilename, fileinfoSource.ModTime(), fileinfoSource.ModTime())
+	err = Chtimes(destFilename, fileinfoSource.ModTime(), fileinfoSource.ModTime())
 	if err != nil {
 		PrintError(fmt.Sprintf("failed to changed modified time: %s", err))
 	}
@@ -171,11 +166,11 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 func (fileCopier *fileCopier) doesDestFileExist(destFilename string) (os.FileInfo, bool) {
 	var fileExists = false
 
-	fileinfoDest, err := os.Stat(destFilename)
+	fileinfoDest, err := Stat(destFilename)
 	if err == nil {
 		fileExists = true
 	} else if err != nil {
-		if !os.IsNotExist(err) {
+		if !IsNotExist(err) {
 			fileExists = true
 		}
 	}
@@ -193,7 +188,6 @@ func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, 
 			context.filename, context.destinationPath)
 		PrintWarning(warningMsg)
 		returnValue = false
-		break
 
 	case replaceSkipIfSame:
 		if (fileinfoSource.ModTime() == fileinfoDest.ModTime()) && (fileinfoSource.Size() == fileinfoDest.Size()) {
@@ -203,15 +197,23 @@ func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, 
 			PrintWarning(warningMsg)
 			returnValue = false
 		}
-		break
 	}
 
 	return returnValue
+}
+
+func closeFile(file *os.File) error {
+	return file.Close()
+}
+
+func syncFile(file *os.File) error {
+	return file.Sync()
 }
 
 func (fileCopier *fileCopier) handleFinish() {
 	recovery := recover()
 	if recovery != nil {
 		PrintError(fmt.Sprintf("panic occurred:\n    %v", recovery))
+		debug.PrintStack()
 	}
 }
