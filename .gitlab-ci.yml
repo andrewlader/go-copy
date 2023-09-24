@@ -27,6 +27,9 @@ unit testing on commit:
 ##########
 
 default:
+  # Tags a runner must have to run this job
+  tags:
+    - docker_executor
   before_script:
     - apk update && apk add git
     - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
