@@ -80,6 +80,7 @@ func main() {
 		printer := message.NewPrinter(language.English)
 		copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
 		copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
+		color.Cyan("\nCopy complete for operation: ", operation)
 		color.White("\nAll done...\n\n")
 
 		finishedSuccessfully = true
