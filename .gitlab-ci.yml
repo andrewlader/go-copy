@@ -26,9 +26,9 @@ unit testing on commit:
 # Section for Creating Release Builds for New Tag
 ##########
 
-#default:
-#    before_script:
-#    - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
+default:
+  before_script:
+    - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
   stage: build
