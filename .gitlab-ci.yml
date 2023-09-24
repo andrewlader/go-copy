@@ -28,9 +28,9 @@ unit testing on commit:
 
 default:
   before_script:
-    - apt-get install -f git
+#    - apt-get install -f git
     - git fetch --tags
-    - 'printf "`git describe --long`\n`go version`\n`date -R`\n" | tee cmd/go-copy/git-describe.txt'
+    - 'printf "`git describe --tags --long`\n`go version`\n`date -R`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
   stage: build
