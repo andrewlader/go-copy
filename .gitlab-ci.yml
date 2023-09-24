@@ -28,6 +28,7 @@ unit testing on commit:
 
 default:
   before_script:
+    - apk update && apk add git
     - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
