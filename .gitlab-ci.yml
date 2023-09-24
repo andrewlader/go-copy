@@ -27,9 +27,10 @@ unit testing on commit:
 ##########
 
 default:
+  image: docker:stable
   before_script:
-    - apt add git
-    - apt add go
+    - apk add --no-cache git
+    - apk add --no-cache go
     - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
