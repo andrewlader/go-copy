@@ -28,6 +28,8 @@ unit testing on commit:
 
 default:
   before_script:
+    - apt add --no-cache git
+    - apt add --no-cache go
     - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
