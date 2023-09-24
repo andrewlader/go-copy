@@ -3,6 +3,7 @@ package copylib
 import (
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -110,18 +111,37 @@ func ReadAllFailure(r io.Reader) ([]byte, error) {
 }
 
 func ReadDirSuccess(dirname string) ([]fs.DirEntry, error) {
-	return testFiles, nil
+	var entries []fs.DirEntry
+
+	for _, dirEntry := range testFiles {
+		if (strings.Contains(dirname, dirEntry.Name())) && (dirEntry.IsDir()) {
+			children := dirEntry.(*testDirEntry).children
+			for _, entry := range children {
+				entries = append(entries, entry)
+			}
+			break
+		}
+	}
+
+	if entries == nil {
+		entries = testFiles
+	}
+
+	return entries, nil
 }
 
-func createDirEntry(name string, size int64) *testDirEntry {
+func createDirEntry(name string, size int64, isDir bool) *testDirEntry {
+	if isDir {
+		size = 0
+	}
 	dirEntry := &testDirEntry{
 		name:  name,
-		isDir: false,
+		isDir: isDir,
 		fileInfo: testFileInfo{
 			name:    name,
 			size:    size,
 			modTime: time.Now(),
-			isDir:   false,
+			isDir:   isDir,
 		},
 	}
 
@@ -193,6 +213,7 @@ type testDirEntry struct {
 	name     string
 	isDir    bool
 	fileInfo fs.FileInfo
+	children []testDirEntry
 }
 
 func (testDirEntry testDirEntry) Name() string {
@@ -204,11 +225,24 @@ func (testDirEntry testDirEntry) IsDir() bool {
 }
 
 func (testDirEntry testDirEntry) Type() os.FileMode {
-	return os.ModePerm
+	if testDirEntry.isDir {
+		return os.ModeDir
+	} else {
+		return os.ModePerm
+	}
 }
 
 func (testDirEntry testDirEntry) Info() (fs.FileInfo, error) {
 	return testDirEntry.fileInfo, nil
+}
+
+func (testDirEntry *testDirEntry) addChildDirEntry(childDirEntry *testDirEntry) error {
+	if testDirEntry.isDir {
+		testDirEntry.children = append(testDirEntry.children, *childDirEntry)
+		return nil
+	} else {
+		return fmt.Errorf("this entry, \"%s\", is not a directory", testDirEntry.name)
+	}
 }
 
 type testFileInfo struct {

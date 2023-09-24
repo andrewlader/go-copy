@@ -33,6 +33,34 @@ func TestCopySuccess(t *testing.T) {
 	runner.Copy()
 }
 
+func TestCopyWithSubDirectoriesSuccess(t *testing.T) {
+	var configName = "foo"
+	var source = "f:\\games\\foobar\\saves"
+	var destinations = []string{"g:\\game_backups\\foobar\\saves", "h:\\game_backups\\foobar\\saves", "i:\\game_backups\\foobar\\saves"}
+
+	SetupTestFileSystemFunctions(destinations)
+	defer func() { ReinitializeFileSystemFunctions() }()
+
+	config := &configuration{
+		name:         configName,
+		source:       source,
+		destinations: destinations,
+		replace:      replaceSkipIfSame,
+	}
+
+	runner := &Runner{
+		configName: config.name,
+		config:     config,
+	}
+
+	runner.Waiter.Add(1)
+	currentLogMode = LogVerbose
+
+	createDirectoriesAndTestFiles()
+
+	runner.Copy()
+}
+
 func TestCopyWithSkipSuccess(t *testing.T) {
 	var configName = "foo"
 	var source = "f:\\games\\foobar\\saves"
@@ -156,12 +184,37 @@ func TestCopyFailure(t *testing.T) {
 func createSimpleTestFiles() {
 	testFiles = make([]fs.DirEntry, 0, 3)
 
-	dirEntry := createDirEntry("foobar001.txt", 8600)
+	dirEntry := createDirEntry("foobar001.txt", 8600, false)
 	testFiles = append(testFiles, dirEntry)
 
-	dirEntry = createDirEntry("foobar002.txt", 8640)
+	dirEntry = createDirEntry("foobar002.txt", 8640, false)
 	testFiles = append(testFiles, dirEntry)
 
-	dirEntry = createDirEntry("foobar003.txt", 86400)
+	dirEntry = createDirEntry("foobar003.txt", 86400, false)
 	testFiles = append(testFiles, dirEntry)
+}
+
+func createDirectoriesAndTestFiles() {
+	testFiles = make([]fs.DirEntry, 0, 3)
+
+	dirEntry := createDirEntry("foobar001.txt", 8600, false)
+	testFiles = append(testFiles, dirEntry)
+
+	dirEntry = createDirEntry("foobar002.txt", 8640, false)
+	testFiles = append(testFiles, dirEntry)
+
+	dirEntry = createDirEntry("foobar003.txt", 86400, false)
+	testFiles = append(testFiles, dirEntry)
+
+	dirEntrySubDir := createDirEntry("subdir001", 0, true)
+	testFiles = append(testFiles, dirEntrySubDir)
+
+	dirEntry = createDirEntry("foobar004.txt", 8600, false)
+	dirEntrySubDir.addChildDirEntry(dirEntry)
+
+	dirEntry = createDirEntry("foobar005.txt", 8640, false)
+	dirEntrySubDir.addChildDirEntry(dirEntry)
+
+	dirEntry = createDirEntry("foobar006.txt", 86400, false)
+	dirEntrySubDir.addChildDirEntry(dirEntry)
 }
