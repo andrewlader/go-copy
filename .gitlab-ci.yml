@@ -28,7 +28,7 @@ unit testing on commit:
 
 default:
   before_script:
-    - apt-get git
+    - apt-get install git
     - 'printf "`git describe --long`\n`go version`\n`date -R`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
