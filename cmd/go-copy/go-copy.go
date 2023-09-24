@@ -80,7 +80,7 @@ func main() {
 		printer := message.NewPrinter(language.English)
 		copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
 		copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
-		color.Cyan("\nCopy complete for operation: ", operation)
+		copylib.PrintStats("    Operation: ", operation)
 		color.White("\nAll done...\n\n")
 
 		finishedSuccessfully = true
@@ -124,6 +124,6 @@ func handleExit() {
 
 		os.Exit(1)
 	} else if finishedSuccessfully {
-		copylib.PrintError("go-copy has completed its job successfully")
+		copylib.PrintError(fmt.Sprintf("go-copy has completed operation \"%s\" successfully", operation))
 	}
 }
