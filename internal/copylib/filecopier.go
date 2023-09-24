@@ -53,7 +53,6 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 		PrintWarning(fmt.Sprintf("skipping path %s: %v", currentPath, err))
 	} else {
 		for _, file := range files {
-
 			if file.Type().IsRegular() {
 				// copy the file
 				context.filename = file.Name()
