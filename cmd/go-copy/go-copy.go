@@ -15,7 +15,7 @@ import (
 	"golang.org/x/text/message"
 )
 
-//go:embed git-describe.txt
+//go:embed ./git-describe.txt
 var buildInfo string
 
 var displayBuildInformation bool
