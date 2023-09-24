@@ -26,14 +26,17 @@ unit testing on commit:
 # Section for Creating Release Builds for New Tag
 ##########
 
+default:
+    before_script:
+    - apk add --no-cache --upgrade git
+    - apk add --no-cache --upgrade go
+    - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
 
 build mac amd64:
   stage: build
   # Tags a runner must have to run this job
   tags:
     - docker_executor
-  before_script:
-    - 'printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt'
   script:
     - env GOOS=darwin GOARCH=amd64 go build -o go-copy cmd/go-copy/go-copy.go
   after_script:
