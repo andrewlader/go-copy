@@ -11,14 +11,14 @@ run:
 	go run cmd/$(BINARY_NAME)/$(BINARY_NAME).go
 
 test:
-	cd configs
-	go run cmd/$(BINARY_NAME)/$(BINARY_NAME).go -operation test -pause
+	cd ./configs/ && \
+	go run ../cmd/$(BINARY_NAME)/$(BINARY_NAME).go --operation test -pause
 
 install: pre-build
 	go install ./cmd/$(BINARY_NAME)
 
 build: pre-build
-	GOARCH=amd64 GOOS=linux go build -o $(BINARY_NAME) cmd/$(BINARY_NAME)/$(BINARY_NAME).go
+	GOARCH=amd64 GOOS=windows go build -o $(BINARY_NAME) cmd/$(BINARY_NAME)/$(BINARY_NAME).go
 
 run_build:
 	./$(BINARY_NAME)
