@@ -73,10 +73,10 @@ func main() {
 
 		stats := color.New(color.FgBlue, color.Bold)
 		copylib.PrintColor(stats, "\nStats:")
+		copylib.PrintStats("    Total Files Copied: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesCopied/2, copyFileRunner.Stats.TotalFilesCopied))
+		copylib.PrintStats("    Total Files Skipped: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesSkipped/2, copyFileRunner.Stats.TotalFilesSkipped))
 		copylib.PrintStats("    Number of Source Files: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfSourceFiles))
 		copylib.PrintStats("    Number of Destinations: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfDestinations))
-		copylib.PrintStats("    Total Files Skipped: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesSkipped/2, copyFileRunner.Stats.TotalFilesSkipped))
-		copylib.PrintStats("    Total Files Copied: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesCopied/2, copyFileRunner.Stats.TotalFilesCopied))
 		printer := message.NewPrinter(language.English)
 		copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
 		copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
