@@ -1,6 +1,8 @@
 # go-copy
 
-[![Latest Release](https://gitlab.com/andrewlader/go-copy/-/badges/release.svg)](https://gitlab.com/andrewlader/go-copy/-/releases)
+![GitHub Release](https://img.shields.io/github/v/release/andrewlader/go-copy?style=plastic)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/andrewlader/go-copy?style=plastic)
+
 
 ## Description
 This command-line tool can copy files from a source directory to one or more destinations. It is easily configured, and can run on Windows, Linux and Mac (Intel and RISC). It's simple to install, and easy to use.
