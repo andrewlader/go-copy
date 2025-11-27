@@ -2,8 +2,6 @@ BINARY_NAME := go-copy
 LOCAL_BINARY := ./$(BINARY_NAME)
 GIT_DESCRIPTION_TXT_FILE := cmd/$(BINARY_NAME)/git-describe.txt
 
-
-
 pre-build:
 	printf "`git describe --long`\n`go version`\n`date --rfc-3339=seconds`\n" | tee cmd/go-copy/git-describe.txt
 
