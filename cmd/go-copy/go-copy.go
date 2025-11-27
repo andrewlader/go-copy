@@ -8,9 +8,9 @@ import (
 
 	_ "embed"
 
+	"github.com/andrewlader/go-copy/internal/copylib"
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
-	"gitlab.com/andrewlader/go-copy/internal/copylib"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )

@@ -15,11 +15,11 @@ There are a few ways to install `go-copy`.
 
 ### If you have Go installed
 ```bash
-$ go get https://gitlab.com/andrewlader/go-copy.git
+$ go get https://github.com/andrewlader/go-copy.git
 ```
 
 ### Install the Executable
-Download the desired binary from the [releases page]()
+Download the desired binary from the [releases page](https://github.com/andrewlader/go-copy/releases)
 
 ## Usage
 go-copy --operation <operation-name> ...<other options>

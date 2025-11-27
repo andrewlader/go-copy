@@ -1,6 +1,6 @@
-module gitlab.com/andrewlader/go-copy
+module github.com/andrewlader/go-copy
 
-go 1.20
+go 1.25
 
 require (
 	github.com/fatih/color v1.14.1
