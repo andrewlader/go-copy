@@ -1,0 +1,102 @@
+name: Build and publish release
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+          - os: windows-latest
+            goos: windows
+          - os: macos-latest
+            goos: darwin
+        arch: [amd64, arm64]
+        go-version: [1.25]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Build and package (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="dist/${{ matrix.goos }}-${{ matrix.arch }}"
+          mkdir -p "$outdir"
+          binname=go-copy
+          env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
+            go build -ldflags "-s -w" -o "$outdir/$binname" ./...
+          tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
+
+      - name: Build and package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $outdir = "dist/${{ matrix.goos }}-${{ matrix.arch }}"
+          New-Item -ItemType Directory -Path $outdir -Force | Out-Null
+          $binname = 'go-copy.exe'
+          $env:GOOS = 'windows'; $env:GOARCH = '${{ matrix.arch }}'; $env:CGO_ENABLED = '0'
+          go build -ldflags "-s -w" -o "$outdir\$binname" ./...
+          Compress-Archive -Path "$outdir\*" -DestinationPath "${{ matrix.goos }}-${{ matrix.arch }}.zip"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.goos }}-${{ matrix.arch }}
+          path: |
+            ${{ matrix.goos }}-${{ matrix.arch }}.tar.gz
+            ${{ matrix.goos }}-${{ matrix.arch }}.zip
+
+  publish:
+    name: Create release and attach builds
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          upload_url="${{ steps.create_release.outputs.upload_url }}"
+          upload_url=${upload_url%\{*}
+          for f in dist/*; do
+            if [ -f "$f" ]; then
+              fname=$(basename "$f")
+              echo "Uploading $fname..."
+              curl -sS -X POST \
+                -H \"Authorization: token $GITHUB_TOKEN\" \
+                -H \"Content-Type: application/octet-stream\" \
+                --data-binary @\"$f\" \
+                \"$upload_url?name=$fname\" \
+                || { echo \"Failed to upload $fname\"; exit 1; }
+            fi
+          done
