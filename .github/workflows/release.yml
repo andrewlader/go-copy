@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/macos-amd64/macos-amd64.tar.gz
+          asset_path: ./dist/darwin-amd64/darwin-amd64.tar.gz
           asset_name: go-copy-${{ inputs.tag_name }}-darwin-amd64.zip
           asset_content_type: application/zip
 
@@ -131,7 +131,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/macos-arm64/macos-arm64.tar.gz
+          asset_path: ./dist/darwin-arm64/darwin-arm64.tar.gz
           asset_name: go-copy-${{ inputs.tag_name }}-darwin-arm64.zip
           asset_content_type: application/zip
 
