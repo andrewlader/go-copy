@@ -50,8 +50,7 @@ jobs:
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-          tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
-          echo ls -al dist/
+          tar -czftv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (MacOS)
         id: build_and_package_macos
@@ -64,8 +63,7 @@ jobs:
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-          tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
-          echo ls -al dist/
+          tar -czftv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (MacOS Unsigned)
         id: build_and_package_macos_unsigned
@@ -78,8 +76,7 @@ jobs:
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-          tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
-          echo ls -al dist/
+          tar -czftv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (Windows)
         id: build_and_package_windows
