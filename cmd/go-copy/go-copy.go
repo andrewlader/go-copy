@@ -20,6 +20,7 @@ var buildInfo string
 
 var displayBuildInformation bool
 var operation string
+var listConfigs bool
 var pauseAtEnd bool
 var finishedSuccessfully bool
 var logModeSilent bool
@@ -61,6 +62,12 @@ func main() {
 		if len(buildInformation) > 2 {
 			copylib.PrintVersionInfo("build date:      ", buildInformation[2])
 		}
+	} else if listConfigs {
+		copylib.ListConfigurations()
+		finishedSuccessfully = true
+		if pauseAtEnd {
+			pauseOutput()
+		}
 	} else {
 		if len(operation) < 1 {
 			panic("the operation flag is required; it defines which operation in the config to execute...")
@@ -94,6 +101,7 @@ func main() {
 func parseArguments() {
 	flag.BoolVar(&displayBuildInformation, "version", false, "display build & version information")
 	flag.StringVar(&operation, "operation", "", "defines the operation to execute (required)")
+	flag.BoolVar(&listConfigs, "list", false, "list all backup sets in the config")
 	flag.BoolVar(&pauseAtEnd, "pause", false, "determines if the app will pause before ending (optional)")
 	flag.BoolVar(&logModeSilent, "silent", false, "logging out put will be sparse (optional)")
 	flag.BoolVar(&logModeSimple, "simple", false, "logging out put will be normal (optional)")
@@ -121,9 +129,10 @@ func handleExit() {
 		errOutput := fmt.Sprintf("panic occurred:\n    %v", recovery)
 		copylib.PrintError(errOutput)
 		copylib.PrintError("go-copy has stopped with an error")
-
 		os.Exit(1)
 	} else if finishedSuccessfully {
-		copylib.PrintError(fmt.Sprintf("go-copy has completed operation \"%s\" successfully", operation))
+		if len(operation) > 0 {
+			copylib.PrintError(fmt.Sprintf("go-copy has completed operation \"%s\" successfully", operation))
+		}
 	}
 }

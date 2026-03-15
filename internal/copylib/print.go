@@ -28,6 +28,18 @@ func PrintStats(stringOne string, stringTwo string) {
 	color.Green("%s%s", color.GreenString(stringOne), color.MagentaString(stringTwo))
 }
 
+func PrintKeyValue(stringOne string, stringTwo string) {
+	color.New(color.FgBlue, color.Bold).Printf("%s", stringOne)
+	color.New(color.FgMagenta).Printf("%s\n", stringTwo)
+}
+
+func PrintKeyValueArray(stringOne string, stringArray []string) {
+	color.New(color.FgBlue, color.Bold).Printf("%s\n", stringOne)
+	for _, str := range stringArray {
+		color.New(color.FgMagenta).Printf("    %s\n", str)
+	}
+}
+
 func PrintColor(color *color.Color, formattedString string) {
 	color.Println(formattedString)
 }

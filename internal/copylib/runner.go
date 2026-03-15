@@ -15,8 +15,6 @@ const (
 
 var currentLogMode = LogSilent
 
-const lineLength = 80
-
 type Runner struct {
 	Waiter     sync.WaitGroup
 	configName string
