@@ -1,0 +1,75 @@
+name: Build and Release Go Executable
+
+# Trigger the workflow manually with inputs
+on:
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'The name/title of the new release (e.g., "v1.0.0 Release")'
+        required: true
+        type: string
+      tag_name:
+        description: 'The tag name for the release (e.g., "v1.0.0")'
+        required: true
+        type: string
+      target_branch:
+        description: 'The target branch to build from (e.g., "main" or "release/v1.0.0")'
+        required: true
+        default: 'main'
+        type: string
+
+permissions:
+  contents: write # Allows the workflow to write to the repository (create release and upload assets)
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.target_branch }} # Checkout the specified branch
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22 # Specify your Go version
+
+      - name: Build Go Executables (Cross-platform)
+        run: |
+          # Define the desired GOOS and GOARCH combinations
+          platforms=("linux/amd64" "windows/amd64" "darwin/amd64")
+
+          for platform in "${platforms[@]}"; do
+            export GOOS=$(echo $platform | cut -d'/' -f1)
+            export GOARCH=$(echo $platform | cut -d'/' -f2)
+            output_name="mycli-${GOOS}-${GOARCH}" # Customize your executable name
+
+            if [ "$GOOS" = "windows" ]; then
+              output_name+=".exe"
+            fi
+
+            echo "Building for $GOOS/$GOARCH..."
+            go build -o ./bin/$output_name .
+          done
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.tag_name }}
+          release_name: ${{ github.event.inputs.release_name }}
+          body: |
+            Automatic release build for version ${{ github.event.inputs.tag_name }}.
+            Built from branch: ${{ github.event.inputs.target_branch }}.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./bin/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.event.inputs.tag_name }}
