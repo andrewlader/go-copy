@@ -7,6 +7,20 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'The name/title of the new release (e.g., "v1.0.0 Release")'
+        required: true
+        type: string
+      tag_name:
+        description: 'The tag name for the release (e.g., "v1.0.0")'
+        required: true
+        type: string
+      target_branch:
+        description: 'The target branch to build from (e.g., "main" or "release/v1.0.0")'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   build:
@@ -39,7 +53,7 @@ jobs:
           mkdir -p "$outdir"
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
-            go build -ldflags "-s -w" -o "$outdir/$binname" ./...
+            go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
           tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (Windows)
@@ -50,7 +64,7 @@ jobs:
           New-Item -ItemType Directory -Path $outdir -Force | Out-Null
           $binname = 'go-copy.exe'
           $env:GOOS = 'windows'; $env:GOARCH = '${{ matrix.arch }}'; $env:CGO_ENABLED = '0'
-          go build -ldflags "-s -w" -o "$outdir\$binname" ./...
+          go build -ldflags "-s -w" -o "$outdir\$binname" ./cmd/go-copy/...
           Compress-Archive -Path "$outdir\*" -DestinationPath "${{ matrix.goos }}-${{ matrix.arch }}.zip"
 
       - name: Upload workflow artifact
@@ -76,8 +90,8 @@ jobs:
         uses: actions/create-release@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
+          tag_name: $tag_name
+          release_name: $release_name
           draft: false
           prerelease: false
 
