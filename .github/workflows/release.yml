@@ -50,7 +50,7 @@ jobs:
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-          tar -czftv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
+          tar -czfv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (MacOS)
         id: build_and_package_macos
@@ -63,7 +63,7 @@ jobs:
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-          tar -czftv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
+          tar -czfv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (MacOS Unsigned)
         id: build_and_package_macos_unsigned
@@ -76,7 +76,7 @@ jobs:
           binname=go-copy
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-          tar -czftv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
+          tar -czfv "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
       - name: Build and package (Windows)
         id: build_and_package_windows
@@ -148,7 +148,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/macos-amd64/macos-arm64.tar.gz
+          asset_path: dist/macos-arm64/macos-arm64.tar.gz
           asset_name: go-copy-${{ inputs.tag_name }}-macos-arm64.zip
           asset_content_type: application/zip
 
