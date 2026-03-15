@@ -16,6 +16,11 @@ on:
         description: 'The tag name for the release (e.g., "v1.0.0")'
         required: true
         type: string
+      target_branch:
+        description: 'The target branch to build from (e.g., "main" or "release/v1.0.0")'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   build:
