@@ -22,20 +22,26 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        arch: [amd64, arm64]
         go-version: [1.25]
-        include:
+        exclude:
           - os: ubuntu-latest
-            goos: linux
-            arch: amd64
-          - os: windows-latest
-            goos: windows
-            arch: amd64
-          - os: macos-latest
-            goos: darwin
-            arch: amd64
-          - os: macos-latest
-            goos: darwin
             arch: arm64
+          - os: windows-latest
+            arch: arm64
+        # include:
+        #   - os: ubuntu-latest
+        #     goos: linux
+        #     arch: amd64
+        #   - os: windows-latest
+        #     goos: windows
+        #     arch: amd64
+        #   - os: macos-latest
+        #     goos: darwin
+        #     arch: amd64
+        #   - os: macos-latest
+        #     goos: darwin
+        #     arch: arm64
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
