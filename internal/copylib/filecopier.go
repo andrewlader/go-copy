@@ -37,7 +37,7 @@ func (fileCopier *fileCopier) run(config *configuration) {
 
 	startTime := time.Now()
 	fileCopier.walkPath("")
-	fileCopier.stats.TimeToCopy = time.Now().Sub(startTime)
+	fileCopier.stats.TimeToCopy = time.Since(startTime)
 }
 
 func (fileCopier *fileCopier) walkPath(pathToWalk string) {
@@ -168,10 +168,9 @@ func (fileCopier *fileCopier) doesDestFileExist(destFilename string) (os.FileInf
 	fileinfoDest, err := Stat(destFilename)
 	if err == nil {
 		fileExists = true
-	} else if err != nil {
-		if !IsNotExist(err) {
-			fileExists = true
-		}
+	} else if !IsNotExist(err) {
+		fileExists = true
+		PrintError(fmt.Sprintf("error checking if file exists: %s", err))
 	}
 
 	return fileinfoDest, fileExists
@@ -189,7 +188,7 @@ func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, 
 		returnValue = false
 
 	case replaceSkipIfSame:
-		if (fileinfoSource.ModTime() == fileinfoDest.ModTime()) && (fileinfoSource.Size() == fileinfoDest.Size()) {
+		if (fileinfoSource.ModTime().Equal(fileinfoDest.ModTime())) && (fileinfoSource.Size() == fileinfoDest.Size()) {
 			fileCopier.stats.TotalFilesSkipped++
 			warningMsg := fmt.Sprintf("%s was not copied to %s because it matches the datetime and size of an existing file, and the replace flag is set to \"skip\"",
 				context.filename, context.destinationPath)

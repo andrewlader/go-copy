@@ -21,10 +21,50 @@ type configuration struct {
 	replace      replaceMode
 }
 
+// print displaysa text representation of the configuration.
+func (config *configuration) print() {
+	if config == nil {
+		return
+	}
+
+	// dests := strings.Join(config.destinations, ", ")
+	replaceStr := "unknown"
+	switch config.replace {
+	case replaceNever:
+		replaceStr = "never"
+	case replaceSkipIfSame:
+		replaceStr = "skip"
+	case replaceAlways:
+		replaceStr = "always"
+	}
+
+	PrintKeyValue("Name: ", config.name)
+	PrintKeyValue("  Source: ", config.source)
+	PrintKeyValueArray("  Destinations: ", config.destinations)
+	PrintKeyValue("  Replace: ", replaceStr)
+}
+
+// ListConfigurations displays the string representations for all configurations.
+func ListConfigurations() {
+	keys := viper.AllSettings()
+	for key := range keys {
+		cfg := getConfiguration(key)
+		if cfg != nil {
+			cfg.print()
+		}
+	}
+
+	Print("End of List")
+}
+
 func getConfiguration(key string) *configuration {
 	var destinations []string
 
 	config := viper.GetStringMap(key)
+	if config == nil {
+		return nil
+	}
+
 	dests := config["destinations"].([]interface{})
 
 	for _, destInst := range dests {
@@ -40,13 +80,12 @@ func getConfiguration(key string) *configuration {
 	switch strings.ToLower(config["replace"].(string)) {
 	case "always":
 		configObj.replace = replaceAlways
-		break
+
 	case "never":
 		configObj.replace = replaceNever
-		break
+
 	case "skip":
 		configObj.replace = replaceSkipIfSame
-		break
 	}
 
 	return configObj

@@ -5,3 +5,11 @@ test:
     - /mnt/d/dev/go-copy-testing-ground/destinationOne
     - /mnt/d/dev/go-copy-testing-ground/destinationTwo
   replace: always
+
+foo:
+  name: Foo
+  source: /mnt/d/dev/go-copy-testing-ground/source
+  destinations:
+    - /mnt/d/dev/go-copy-testing-ground/destinationOne
+    - /mnt/d/dev/go-copy-testing-ground/destinationTwo
+  replace: always
