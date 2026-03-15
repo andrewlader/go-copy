@@ -16,11 +16,6 @@ on:
         description: 'The tag name for the release (e.g., "v1.0.0")'
         required: true
         type: string
-      target_branch:
-        description: 'The target branch to build from (e.g., "main" or "release/v1.0.0")'
-        required: true
-        default: 'main'
-        type: string
 
 jobs:
   build:
@@ -45,6 +40,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Build and package (Linux/macOS)
+        id: build_and_package
         if: matrix.os != 'windows-latest'
         shell: bash
         run: |
@@ -102,19 +98,24 @@ jobs:
       - name: Upload release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          upload_url="${{ steps.create_release.outputs.upload_url }}"
-          upload_url=${upload_url%\{*}
-          for f in dist/*; do
-            if [ -f "$f" ]; then
-              fname=$(basename "$f")
-              echo "Uploading $fname..."
-              curl -sS -X POST \
-                -H \"Authorization: token $GITHUB_TOKEN\" \
-                -H \"Content-Type: application/octet-stream\" \
-                --data-binary @\"$f\" \
-                \"$upload_url?name=$fname\" \
-                || { echo \"Failed to upload $fname\"; exit 1; }
-            fi
-          done
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/*
+          asset_name: *.zip
+          asset_content_type: application/zip
+        #   set -euo pipefail
+        #   upload_url="${{ steps.create_release.outputs.upload_url }}"
+        #   upload_url=${upload_url%\{*}
+        #   for f in dist/*; do
+        #     if [ -f "$f" ]; then
+        #       fname=$(basename "$f")
+        #       echo "Uploading $fname..."
+        #       curl -sS -X POST \
+        #         -H \"Authorization: token $GITHUB_TOKEN\" \
+        #         -H \"Content-Type: application/octet-stream\" \
+        #         --data-binary @\"$f\" \
+        #         \"$upload_url?name=$fname\" \
+        #         || { echo \"Failed to upload $fname\"; exit 1; }
+        #     fi
+        #   done
