@@ -61,32 +61,6 @@ jobs:
           go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
           tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
 
-      # - name: Build and package (MacOS)
-      #   id: build_and_package_macos
-      #   if: matrix.os == 'macos-latest' && matrix.arch == 'amd64'
-      #   shell: bash
-      #   run: |
-      #     set -euo pipefail
-      #     outdir="dist/${{ matrix.goos }}-${{ matrix.arch }}"
-      #     mkdir -p "$outdir"
-      #     binname=go-copy
-      #     env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
-      #     go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-      #     tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
-
-      # - name: Build and package (MacOS Unsigned)
-      #   id: build_and_package_macos_unsigned
-      #   if: matrix.os == 'macos-latest' && matrix.arch == 'arm64'
-      #   shell: bash
-      #   run: |
-      #     set -euo pipefail
-      #     outdir="dist/${{ matrix.goos }}-${{ matrix.arch }}"
-      #     mkdir -p "$outdir"
-      #     binname=go-copy
-      #     env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 \
-      #     go build -ldflags "-s -w" -o "$outdir/$binname" ./cmd/go-copy/...
-      #     tar -czf "${{ matrix.goos }}-${{ matrix.arch }}.tar.gz" -C dist "${{ matrix.goos }}-${{ matrix.arch }}"
-
       - name: Build and package (Windows)
         id: build_and_package_windows
         if: matrix.os == 'windows-latest'
@@ -148,7 +122,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dist/macos-amd64/macos-amd64.tar.gz
-          asset_name: go-copy-${{ inputs.tag_name }}-macos-amd64.zip
+          asset_name: go-copy-${{ inputs.tag_name }}-darwin-amd64.zip
           asset_content_type: application/zip
 
       - name: Upload macos unsigned release asset
@@ -158,7 +132,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dist/macos-arm64/macos-arm64.tar.gz
-          asset_name: go-copy-${{ inputs.tag_name }}-macos-arm64.zip
+          asset_name: go-copy-${{ inputs.tag_name }}-darwin-arm64.zip
           asset_content_type: application/zip
 
       - name: Upload windows release asset
