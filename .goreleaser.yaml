@@ -20,6 +20,12 @@ builds:
     # Default: Project directory name.
     binary: go-copy
 
+    # Build ldflags. This is a list of strings, each one will be passed as a separate `-ldflags` argument to the go build command.
+    ldflags:
+      - "-X main.version={{.Tag}}-{{.ShortCommit}}"
+      - "-X main.commit={{.Commit}}"
+      - "-X main.date={{.Date}}"
+
     env:
       - CGO_ENABLED=0
     goos:
