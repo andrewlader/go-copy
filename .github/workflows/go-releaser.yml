@@ -1,5 +1,5 @@
 # .github/workflows/release.yml
-name: goreleaser
+name: Build and publish release (GoReleaser)
 
 on:
   pull_request:
