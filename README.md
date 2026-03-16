@@ -3,10 +3,10 @@
 | Category | Badges |
 | :--- | :--- |
 | __Project Information__ | ![GitHub Release](https://img.shields.io/github/v/release/andrewlader/go-copy?style=plastic) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/andrewlader/go-copy?style=plastic) |
-| __Testing__ | ![Scrutinizer coverage (GitHub/Bitbucket) with branch](https://img.shields.io/scrutinizer/coverage/g/andrewlader/go-copy/main) |
-| __Branch__ | ![GitHub branch check runs](https://img.shields.io/github/check-runs/andrewlader/go-copy/main) |
-| __License__ | ![GitHub License](https://img.shields.io/github/license/andrewlader/go-copy) |
-| __Purpose__ | ![Static Badge](https://img.shields.io/badge/CLI-Copy_Tool-blue) |
+| __Testing__ | ![Scrutinizer coverage (GitHub/Bitbucket) with branch](https://img.shields.io/scrutinizer/coverage/g/andrewlader/go-copy/main?style=plastic) |
+| __Branch__ | ![GitHub branch check runs](https://img.shields.io/github/check-runs/andrewlader/go-copy/main?style=plastic) |
+| __License__ | ![GitHub License](https://img.shields.io/github/license/andrewlader/go-copy?style=plastic) |
+| __Purpose__ | ![Static Badge](https://img.shields.io/badge/CLI-Copy_Tool-blue?style=plastic) |
 
 ## Description
 This command-line tool can copy files from a source directory to one or more destinations. It is easily configured, and can run on Windows, Linux and Mac (Intel and RISC). It's simple to install, and easy to use.
