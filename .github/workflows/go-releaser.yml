@@ -2,13 +2,6 @@
 name: Build and publish release (GoReleaser)
 
 on:
-  pull_request:
-    types:
-      # Only consider the event when a pull request is closed
-      - closed
-    branches:
-      # Target the main branch
-      - main
   push:
     # run only against tags
     tags:
