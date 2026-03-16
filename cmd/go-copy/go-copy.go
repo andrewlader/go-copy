@@ -4,9 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
-
-	_ "embed"
 
 	"github.com/andrewlader/go-copy/internal/copylib"
 	"github.com/fatih/color"
@@ -15,9 +12,9 @@ import (
 	"golang.org/x/text/message"
 )
 
-//go:embed git-describe.txt
-var buildInfo string
-
+var version string
+var date string
+var commit string
 var displayBuildInformation bool
 var operation string
 var listConfigs bool
@@ -52,49 +49,44 @@ func main() {
 	defer handleExit()
 
 	if displayBuildInformation {
-		buildInformation := strings.Split(buildInfo, "\n")
-		if len(buildInformation) > 0 {
-			copylib.PrintVersionInfo("go-copy version: ", buildInformation[0])
-		}
-		if len(buildInformation) > 1 {
-			copylib.PrintVersionInfo("go version:      ", buildInformation[1])
-		}
-		if len(buildInformation) > 2 {
-			copylib.PrintVersionInfo("build date:      ", buildInformation[2])
-		}
+		copylib.PrintVersionInfo("build version: ", version)
+		copylib.PrintVersionInfo("build commit:  ", commit)
+		copylib.PrintVersionInfo("build date:    ", date)
 	} else if listConfigs {
 		copylib.ListConfigurations()
 		finishedSuccessfully = true
-		if pauseAtEnd {
-			pauseOutput()
-		}
 	} else {
-		if len(operation) < 1 {
-			panic("the operation flag is required; it defines which operation in the config to execute...")
-		}
+		// run the main operation of the program, which is copying files based on the configuration
+		runOperation()
+	}
+}
 
-		copyFileRunner := copylib.NewRunner(operation, logMode)
-		go copyFileRunner.Copy()
+func runOperation() {
+	if len(operation) < 1 {
+		panic("the operation flag is required; it defines which operation in the config to execute...")
+	}
 
-		copyFileRunner.Waiter.Wait()
+	copyFileRunner := copylib.NewRunner(operation, logMode)
+	go copyFileRunner.Copy()
 
-		stats := color.New(color.FgBlue, color.Bold)
-		copylib.PrintColor(stats, "\nStats:")
-		copylib.PrintStats("    Total Files Copied: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesCopied/2, copyFileRunner.Stats.TotalFilesCopied))
-		copylib.PrintStats("    Total Files Skipped: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesSkipped/2, copyFileRunner.Stats.TotalFilesSkipped))
-		copylib.PrintStats("    Number of Source Files: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfSourceFiles))
-		copylib.PrintStats("    Number of Destinations: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfDestinations))
-		printer := message.NewPrinter(language.English)
-		copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
-		copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
-		copylib.PrintStats("    Operation: ", operation)
-		color.White("\nAll done...\n\n")
+	copyFileRunner.Waiter.Wait()
 
-		finishedSuccessfully = true
+	stats := color.New(color.FgBlue, color.Bold)
+	copylib.PrintColor(stats, "\nStats:")
+	copylib.PrintStats("    Total Files Copied: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesCopied/2, copyFileRunner.Stats.TotalFilesCopied))
+	copylib.PrintStats("    Total Files Skipped: ", fmt.Sprintf("%d (%d)", copyFileRunner.Stats.TotalFilesSkipped/2, copyFileRunner.Stats.TotalFilesSkipped))
+	copylib.PrintStats("    Number of Source Files: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfSourceFiles))
+	copylib.PrintStats("    Number of Destinations: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfDestinations))
+	printer := message.NewPrinter(language.English)
+	copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
+	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
+	copylib.PrintStats("    Operation: ", operation)
+	color.White("\nAll done...\n\n")
 
-		if pauseAtEnd {
-			pauseOutput()
-		}
+	finishedSuccessfully = true
+
+	if pauseAtEnd {
+		pauseOutput()
 	}
 }
 
