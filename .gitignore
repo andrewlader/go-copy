@@ -32,3 +32,5 @@ go.work
 cmd/go-copy/git-describe.txt
 
 # End of https://www.toptal.com/developers/gitignore/api/go
+# Added by goreleaser init:
+dist/
