@@ -95,8 +95,7 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 	}
 
 	if count == 0 {
-		PrintWarning(fmt.Sprintf("file \"%s\" was skipped", context.filename))
-		fileCopier.stats.TotalFilesSkipped++
+		PrintInfo(fmt.Sprintf("file \"%s\" was skipped", context.filename))
 	} else if count == len(fileCopier.config.destinations) {
 		Print(fmt.Sprintf("copied file \"%s\"", context.filename))
 	} else {
@@ -190,19 +189,17 @@ func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, 
 	switch fileCopier.config.replace {
 	case replaceNever:
 		fileCopier.stats.TotalFilesSkipped++
-		warningMsg := fmt.Sprintf("%s was not copied to %s as it already exists, and the replace flag is set to \"never\"",
+		infoMsg := fmt.Sprintf("%s was not copied to %s as it already exists, and the replace flag is set to \"never\"",
 			context.filename, context.destinationPath)
-		PrintWarning(warningMsg)
-		fileCopier.stats.NumberOfWarnings++
+		PrintInfo(infoMsg)
 		returnValue = false
 
 	case replaceSkipIfSame:
 		if (fileinfoSource.ModTime().Equal(fileinfoDest.ModTime())) && (fileinfoSource.Size() == fileinfoDest.Size()) {
 			fileCopier.stats.TotalFilesSkipped++
-			warningMsg := fmt.Sprintf("%s was not copied to %s because it matches the datetime and size of an existing file, and the replace flag is set to \"skip\"",
+			infoMsg := fmt.Sprintf("%s was not copied to %s because it matches the datetime and size of an existing file, and the replace flag is set to \"skip\"",
 				context.filename, context.destinationPath)
-			PrintWarning(warningMsg)
-			fileCopier.stats.NumberOfWarnings++
+			PrintInfo(infoMsg)
 			returnValue = false
 		}
 	}
