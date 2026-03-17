@@ -32,8 +32,18 @@ func PrintAlways(formattedString string) {
 	color.Green("%s%s", color.GreenString("go-copy: "), color.BlueString(formattedString))
 }
 
+func PrintBlankLine() {
+	color.Green("")
+}
+
 func PrintVersionInfo(stringOne string, stringTwo string) {
 	color.Green("%s%s", color.CyanString(stringOne), color.MagentaString(stringTwo))
+}
+
+func PrintSimple(formattedString string) {
+	if currentLogMode >= LogSimple {
+		color.Yellow("%s%s", color.GreenString("go-copy: "), color.New(color.FgMagenta, color.Italic).Sprint(formattedString))
+	}
 }
 
 func PrintDebug(formattedString string) {
