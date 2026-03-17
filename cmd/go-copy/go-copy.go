@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
+	"runtime/debug"
 
 	"github.com/andrewlader/go-copy/internal/copylib"
 	"github.com/fatih/color"
@@ -12,6 +14,7 @@ import (
 	"golang.org/x/text/message"
 )
 
+var loadedConfigs bool
 var version string
 var date string
 var commit string
@@ -22,9 +25,12 @@ var pauseAtEnd bool
 var finishedSuccessfully bool
 var logModeSilent bool
 var logModeSimple bool
+var logModeInfo bool
+var logModeDebug bool
 var logModeVerbose bool
 var logMode copylib.LogMode
 
+// init is called before the main function and is used to set up the configuration and handle any necessary initialization for the application.
 func init() {
 	defer handleExit()
 
@@ -32,19 +38,31 @@ func init() {
 
 	parseArguments()
 
-	viper.SetConfigName("go-copy-config")           // name of config file (without extension)
-	viper.SetConfigType("yml")                      // REQUIRED if the config file does not have the extension in the name
-	viper.SetConfigType("yaml")                     // REQUIRED if the config file does not have the extension in the name
-	viper.AddConfigPath(".")                        // path to look for the config file in
-	viper.AddConfigPath("cmd/")                     // path to look for the config file in
-	viper.AddConfigPath("config/")                  // path to look for the config file in
-	viper.AddConfigPath("configs/")                 // path to look for the config file in
-	err := viper.ReadInConfig()                     // Find and read the config file
-	if (!displayBuildInformation) && (err != nil) { // Handle errors reading the config file
-		panic(fmt.Errorf("fatal error processing config file: %s", err))
+	if !displayBuildInformation {
+		viper.SetConfigName("go-copy-config")         // name of config file (without extension)
+		viper.SetConfigType("yml")                    // REQUIRED if the config file does not have the extension in the name
+		viper.SetConfigType("yaml")                   // REQUIRED if the config file does not have the extension in the name
+		viper.AddConfigPath(".")                      // look for the config file in this directory
+		viper.AddConfigPath("/etc/go-copy")           // look for the config file in this directory
+		viper.AddConfigPath("%USERPROFILE%/.go-copy") // look for the config file in this directory
+		viper.AddConfigPath("%USERPROFILE%/.config")  // look for the config file in this directory
+		viper.AddConfigPath("$HOME/")                 // look for the config file in this directory
+		viper.AddConfigPath("$HOME/.config")          // look for the config file in this directory
+		viper.AddConfigPath("%HOME/.config/go-copy")  // look for the config file in this directory
+		viper.AddConfigPath("config/")                // look for the config file in this directory
+		viper.AddConfigPath("configs/")               // look for the config file in this directory
+		err := viper.ReadInConfig()                   // Find and read the config file
+		if err != nil {
+			loadedConfigs = false
+			directUserToCreateConfigFile()
+		} else {
+			copylib.PrintDebug(fmt.Sprintf("config file loaded successfully: %s", viper.ConfigFileUsed()))
+			loadedConfigs = true
+		}
 	}
 }
 
+// main is the entry point of the application. It handles command-line arguments and executes the appropriate actions based on those arguments.
 func main() {
 	defer handleExit()
 
@@ -52,21 +70,28 @@ func main() {
 		copylib.PrintVersionInfo("build version: ", version)
 		copylib.PrintVersionInfo("build commit:  ", commit)
 		copylib.PrintVersionInfo("build date:    ", date)
-	} else if listConfigs {
-		copylib.ListConfigurations()
-		finishedSuccessfully = true
-	} else {
-		// run the main operation of the program, which is copying files based on the configuration
-		runOperation()
+	} else if loadedConfigs {
+		if listConfigs {
+			copylib.ListConfigurations()
+		} else {
+			// run the main operation of the program, which is copying files based on the configuration
+			finishedSuccessfully = runOperation()
+		}
 	}
 }
 
-func runOperation() {
+// runOperation executes the file copy operation defined in the configuration.
+func runOperation() bool {
 	if len(operation) < 1 {
 		panic("the operation flag is required; it defines which operation in the config to execute...")
 	}
 
-	copyFileRunner := copylib.NewRunner(operation, logMode)
+	copyFileRunner, err := copylib.NewRunner(operation)
+	if err != nil {
+		copylib.PrintError(fmt.Sprintf("error initializing runner for operation \"%s\": %s", operation, err))
+		return false
+	}
+
 	go copyFileRunner.Copy()
 
 	copyFileRunner.Waiter.Wait()
@@ -83,19 +108,49 @@ func runOperation() {
 	copylib.PrintStats("    Operation: ", operation)
 	color.White("\nAll done...\n\n")
 
-	finishedSuccessfully = true
-
 	if pauseAtEnd {
 		pauseOutput()
 	}
+
+	return true
 }
 
+// directUserToCreateConfigFile prompts the user to create an empty YAML config file in the appropriate location for the OS.
+func directUserToCreateConfigFile() {
+	var defaultPath string
+	var newFile string
+
+	copylib.PrintError("No config file found, and this application lacks the permissions to create one...")
+	switch runtimeOS := runtime.GOOS; runtimeOS {
+	case "windows":
+		userProfile := os.Getenv("USERPROFILE")
+		if userProfile != "" {
+			defaultPath = userProfile + "\\.go-copy"
+		} else {
+			defaultPath = ".\\.config"
+		}
+		newFile = defaultPath + "\\go-copy-config.yaml"
+	case "darwin", "linux":
+		defaultPath = "/etc/go-copy/"
+		newFile = defaultPath + "go-copy-config.yaml"
+	default:
+		defaultPath = "./configs/"
+		newFile = defaultPath + "go-copy-config.yaml"
+	}
+
+	copylib.PrintError("It is recommended to create an empty config file here:")
+	copylib.PrintErrorHighlight(fmt.Sprintf("    %s", newFile))
+}
+
+// parseArguments processes the command-line arguments and sets the appropriate variables.
 func parseArguments() {
 	flag.BoolVar(&displayBuildInformation, "version", false, "display build & version information")
 	flag.StringVar(&operation, "operation", "", "defines the operation to execute (required)")
 	flag.BoolVar(&listConfigs, "list", false, "list all backup sets in the config")
 	flag.BoolVar(&pauseAtEnd, "pause", false, "determines if the app will pause before ending (optional)")
 	flag.BoolVar(&logModeSilent, "silent", false, "logging out put will be sparse (optional)")
+	flag.BoolVar(&logModeInfo, "info", false, "logging out put will be at the info level (optional)")
+	flag.BoolVar(&logModeDebug, "debug", false, "logging out put will be at the debug level (optional)")
 	flag.BoolVar(&logModeSimple, "simple", false, "logging out put will be normal (optional)")
 	flag.BoolVar(&logModeVerbose, "verbose", false, "logging out put will be verbose (optional)")
 
@@ -105,22 +160,34 @@ func parseArguments() {
 		logMode = copylib.LogSilent
 	} else if logModeSimple {
 		logMode = copylib.LogSimple
+	} else if logModeDebug {
+		logMode = copylib.LogDebug
+	} else if logModeInfo {
+		logMode = copylib.LogInfo
 	} else if logModeVerbose {
 		logMode = copylib.LogVerbose
+	} else {
+		logMode = copylib.LogInfo
 	}
+
+	copylib.SetLogMode(logMode)
 }
 
+// pauseOutput prompts the user to press enter before continuing, effectively pausing the output.
 func pauseOutput() {
 	copylib.Print("Press enter to continue...")
 	fmt.Scanln()
 }
 
+// handleExit recovers from any panics that occur during the execution of the program and prints an error message before exiting.
+// If the program finishes successfully, it prints a success message.
 func handleExit() {
 	recovery := recover()
 	if recovery != nil {
 		errOutput := fmt.Sprintf("panic occurred:\n    %v", recovery)
 		copylib.PrintError(errOutput)
 		copylib.PrintError("go-copy has stopped with an error")
+		copylib.PrintError(fmt.Sprintf("%s", debug.Stack()))
 		os.Exit(1)
 	} else if finishedSuccessfully {
 		if len(operation) > 0 {
