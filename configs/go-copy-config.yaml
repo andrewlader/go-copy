@@ -12,4 +12,4 @@ foo:
   destinations:
     - /mnt/d/dev/go-copy-testing-ground/destinationOne
     - /mnt/d/dev/go-copy-testing-ground/destinationTwo
-  replace: always
+  replace: never
