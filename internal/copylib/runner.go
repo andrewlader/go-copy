@@ -1,19 +1,9 @@
 package copylib
 
 import (
-	"log"
+	"fmt"
 	"sync"
 )
-
-type LogMode int8
-
-const (
-	LogSilent LogMode = iota
-	LogSimple
-	LogVerbose
-)
-
-var currentLogMode = LogSilent
 
 type Runner struct {
 	Waiter     sync.WaitGroup
@@ -22,20 +12,20 @@ type Runner struct {
 	Stats      *stats
 }
 
-func NewRunner(configName string, logMode LogMode) *Runner {
+func NewRunner(configName string) (*Runner, error) {
+	config := getConfiguration(configName)
+	if config == nil {
+		return nil, fmt.Errorf("configuration with name '%s' not found", configName)
+	}
+
 	runner := &Runner{
 		configName: configName,
 	}
 
-	config := getConfiguration(configName)
-
 	runner.config = config
 	runner.Waiter.Add(1)
 
-	// set the current logging mode to what the user chose
-	currentLogMode = logMode
-
-	return runner
+	return runner, nil
 }
 
 func (runner *Runner) Copy() {
@@ -52,7 +42,7 @@ func (runner *Runner) Copy() {
 func (runner *Runner) handleFinish() {
 	recovery := recover()
 	if recovery != nil {
-		log.Printf("panic occurred:\n    %v", recovery)
+		PrintError(fmt.Sprintf("panic occurred:\n    %v", recovery))
 	}
 
 	runner.Waiter.Done()

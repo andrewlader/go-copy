@@ -1,6 +1,7 @@
 package copylib
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -61,7 +62,8 @@ func getConfiguration(key string) *configuration {
 	var destinations []string
 
 	config := viper.GetStringMap(key)
-	if config == nil {
+	if len(config) == 0 {
+		PrintError(fmt.Sprintf("no configuration was found for: %s", key))
 		return nil
 	}
 
