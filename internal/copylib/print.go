@@ -9,8 +9,9 @@ type LogMode int8
 const (
 	LogSilent LogMode = iota
 	LogSimple
-	LogDebug
+	LogWarning
 	LogInfo
+	LogDebug
 	LogVerbose
 )
 
@@ -27,35 +28,38 @@ func Print(formattedString string) {
 	}
 }
 
+func PrintAlways(formattedString string) {
+	color.Green("%s%s", color.GreenString("go-copy: "), color.BlueString(formattedString))
+}
+
 func PrintVersionInfo(stringOne string, stringTwo string) {
 	color.Green("%s%s", color.CyanString(stringOne), color.MagentaString(stringTwo))
 }
 
 func PrintDebug(formattedString string) {
 	if currentLogMode >= LogDebug {
-		color.New(color.FgGreen, color.Bold).Print("go-copy: ")
-		color.New(color.FgHiMagenta, color.Italic).Printf("%s\n", formattedString)
+		color.Yellow("%s%s", color.GreenString("go-copy: DEBUG - "), color.New(color.FgBlue, color.Italic).Sprint(formattedString))
 	}
 }
 
 func PrintInfo(formattedString string) {
 	if currentLogMode >= LogInfo {
-		color.Yellow("%s%s", color.WhiteString("go-copy: "), color.New(color.FgCyan, color.Italic).Sprint(formattedString))
+		color.Yellow("%s%s", color.WhiteString("go-copy: INFO - "), color.New(color.FgCyan, color.Italic).Sprint(formattedString))
 	}
 }
 
 func PrintWarning(formattedString string) {
-	if currentLogMode >= LogSimple {
-		color.Yellow("%s%s", color.YellowString("go-copy: "), color.New(color.FgMagenta, color.Italic).Sprint(formattedString))
+	if currentLogMode >= LogWarning {
+		color.Yellow("%s%s", color.YellowString("go-copy: WARNING - "), color.New(color.FgMagenta, color.Italic).Sprint(formattedString))
 	}
 }
 
 func PrintError(formattedString string) {
-	color.Red("%s%s", color.RedString("go-copy: "), color.New(color.FgBlue, color.Italic).Sprint(formattedString))
+	color.Red("%s%s", color.RedString("go-copy: ERROR - "), color.New(color.FgYellow, color.Italic).Sprint(formattedString))
 }
 
 func PrintErrorHighlight(formattedString string) {
-	color.Red("%s%s", color.RedString("go-copy: "), color.New(color.FgMagenta, color.Italic).Sprint(formattedString))
+	color.Red("%s%s", color.RedString("go-copy: ERROR - "), color.New(color.FgMagenta, color.Italic).Sprint(formattedString))
 }
 
 func PrintStats(stringOne string, stringTwo string) {
