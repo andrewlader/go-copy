@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"runtime/debug"
 
 	"github.com/andrewlader/go-copy/internal/copylib"
 	"github.com/fatih/color"
@@ -193,7 +192,6 @@ func handleExit() {
 		errOutput := fmt.Sprintf("panic occurred:\n    %v", recovery)
 		copylib.PrintError(errOutput)
 		copylib.PrintError("go-copy has stopped with an error")
-		copylib.PrintError(fmt.Sprintf("%s", debug.Stack()))
 		os.Exit(1)
 	} else if finishedSuccessfully {
 		if len(operation) > 0 {
