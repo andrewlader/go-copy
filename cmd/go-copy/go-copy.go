@@ -26,6 +26,7 @@ var finishedSuccessfully bool
 var logModeSilent bool
 var logModeSimple bool
 var logModeInfo bool
+var logModeWarning bool
 var logModeDebug bool
 var logModeVerbose bool
 var logMode copylib.LogMode
@@ -56,7 +57,7 @@ func init() {
 			loadedConfigs = false
 			directUserToCreateConfigFile()
 		} else {
-			copylib.PrintDebug(fmt.Sprintf("config file loaded successfully: %s", viper.ConfigFileUsed()))
+			copylib.PrintInfo(fmt.Sprintf("config file loaded successfully: %s", viper.ConfigFileUsed()))
 			loadedConfigs = true
 		}
 	}
@@ -105,6 +106,8 @@ func runOperation() bool {
 	printer := message.NewPrinter(language.English)
 	copylib.PrintStats("    Bytes Copied: ", printer.Sprintf("%d", copyFileRunner.Stats.BytesCopied))
 	copylib.PrintStats("    Time to Copy: ", fmt.Sprintf("%f", copyFileRunner.Stats.TimeToCopy.Seconds()))
+	copylib.PrintStats("    Warnings: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfWarnings))
+	copylib.PrintStats("    Errors: ", fmt.Sprintf("%d", copyFileRunner.Stats.NumberOfErrors))
 	copylib.PrintStats("    Operation: ", operation)
 	color.White("\nAll done...\n\n")
 
@@ -112,7 +115,7 @@ func runOperation() bool {
 		pauseOutput()
 	}
 
-	return true
+	return copyFileRunner.Stats.NumberOfErrors == 0
 }
 
 // directUserToCreateConfigFile prompts the user to create an empty YAML config file in the appropriate location for the OS.
@@ -149,9 +152,10 @@ func parseArguments() {
 	flag.BoolVar(&listConfigs, "list", false, "list all backup sets in the config")
 	flag.BoolVar(&pauseAtEnd, "pause", false, "determines if the app will pause before ending (optional)")
 	flag.BoolVar(&logModeSilent, "silent", false, "logging out put will be sparse (optional)")
+	flag.BoolVar(&logModeSimple, "simple", false, "logging out put will be normal (optional)")
+	flag.BoolVar(&logModeWarning, "warning", false, "logging out put will be at the warning level (optional)")
 	flag.BoolVar(&logModeInfo, "info", false, "logging out put will be at the info level (optional)")
 	flag.BoolVar(&logModeDebug, "debug", false, "logging out put will be at the debug level (optional)")
-	flag.BoolVar(&logModeSimple, "simple", false, "logging out put will be normal (optional)")
 	flag.BoolVar(&logModeVerbose, "verbose", false, "logging out put will be verbose (optional)")
 
 	flag.Parse()
@@ -160,10 +164,12 @@ func parseArguments() {
 		logMode = copylib.LogSilent
 	} else if logModeSimple {
 		logMode = copylib.LogSimple
-	} else if logModeDebug {
-		logMode = copylib.LogDebug
+	} else if logModeWarning {
+		logMode = copylib.LogWarning
 	} else if logModeInfo {
 		logMode = copylib.LogInfo
+	} else if logModeDebug {
+		logMode = copylib.LogDebug
 	} else if logModeVerbose {
 		logMode = copylib.LogVerbose
 	} else {
@@ -175,7 +181,7 @@ func parseArguments() {
 
 // pauseOutput prompts the user to press enter before continuing, effectively pausing the output.
 func pauseOutput() {
-	copylib.Print("Press enter to continue...")
+	copylib.PrintAlways("Press enter to continue...")
 	fmt.Scanln()
 }
 
@@ -191,7 +197,7 @@ func handleExit() {
 		os.Exit(1)
 	} else if finishedSuccessfully {
 		if len(operation) > 0 {
-			copylib.PrintError(fmt.Sprintf("go-copy has completed operation \"%s\" successfully", operation))
+			copylib.PrintAlways(fmt.Sprintf("go-copy has completed operation \"%s\" successfully", operation))
 		}
 	}
 }

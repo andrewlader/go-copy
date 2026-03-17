@@ -22,6 +22,8 @@ type stats struct {
 	TotalFilesCopied     int
 	BytesCopied          int64
 	TimeToCopy           time.Duration
+	NumberOfWarnings     int
+	NumberOfErrors       int
 }
 
 type fileCopier struct {
@@ -50,7 +52,8 @@ func (fileCopier *fileCopier) walkPath(pathToWalk string) {
 
 	files, err := ReadDir(currentPath)
 	if err != nil {
-		PrintWarning(fmt.Sprintf("skipping path %s: %v", currentPath, err))
+		PrintError(fmt.Sprintf("skipping path %s:\n    %v", currentPath, err))
+		fileCopier.stats.NumberOfErrors++
 	} else {
 		for _, file := range files {
 			if file.Type().IsRegular() {
@@ -85,6 +88,7 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 		ok, err = fileCopier.copyFile(context, destinationPath)
 		if err != nil {
 			PrintError(fmt.Sprintf("error copying file %s: %s", context.filename, err))
+			fileCopier.stats.NumberOfErrors++
 		} else if ok {
 			count++
 		}
@@ -92,6 +96,7 @@ func (fileCopier *fileCopier) copyFileToDestinations(context *copyContext) {
 
 	if count == 0 {
 		PrintWarning(fmt.Sprintf("file \"%s\" was skipped", context.filename))
+		fileCopier.stats.TotalFilesSkipped++
 	} else if count == len(fileCopier.config.destinations) {
 		Print(fmt.Sprintf("copied file \"%s\"", context.filename))
 	} else {
@@ -134,6 +139,7 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	destFile, err := Create(destFilename)
 	if err != nil {
 		PrintError(fmt.Sprintf("error creating %s: %s", destFilename, err))
+		fileCopier.stats.NumberOfErrors++
 		return false, err
 	}
 	defer Close(destFile)
@@ -154,6 +160,7 @@ func (fileCopier *fileCopier) copyFile(context *copyContext, destinationPath str
 	err = Chtimes(destFilename, fileinfoSource.ModTime(), fileinfoSource.ModTime())
 	if err != nil {
 		PrintError(fmt.Sprintf("failed to changed modified time: %s", err))
+		fileCopier.stats.NumberOfErrors++
 	}
 
 	fileCopier.stats.TotalFilesCopied++
@@ -171,6 +178,7 @@ func (fileCopier *fileCopier) doesDestFileExist(destFilename string) (os.FileInf
 	} else if !IsNotExist(err) {
 		fileExists = true
 		PrintError(fmt.Sprintf("error checking if file exists: %s", err))
+		fileCopier.stats.NumberOfErrors++
 	}
 
 	return fileinfoDest, fileExists
@@ -185,6 +193,7 @@ func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, 
 		warningMsg := fmt.Sprintf("%s was not copied to %s as it already exists, and the replace flag is set to \"never\"",
 			context.filename, context.destinationPath)
 		PrintWarning(warningMsg)
+		fileCopier.stats.NumberOfWarnings++
 		returnValue = false
 
 	case replaceSkipIfSame:
@@ -193,6 +202,7 @@ func (fileCopier *fileCopier) checkIfFileShouldBeReplaced(context *copyContext, 
 			warningMsg := fmt.Sprintf("%s was not copied to %s because it matches the datetime and size of an existing file, and the replace flag is set to \"skip\"",
 				context.filename, context.destinationPath)
 			PrintWarning(warningMsg)
+			fileCopier.stats.NumberOfWarnings++
 			returnValue = false
 		}
 	}
@@ -212,6 +222,7 @@ func (fileCopier *fileCopier) handleFinish() {
 	recovery := recover()
 	if recovery != nil {
 		PrintError(fmt.Sprintf("panic occurred:\n    %v", recovery))
+		fileCopier.stats.NumberOfErrors++
 		debug.PrintStack()
 	}
 }

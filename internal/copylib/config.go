@@ -54,8 +54,6 @@ func ListConfigurations() {
 			cfg.print()
 		}
 	}
-
-	Print("End of List")
 }
 
 func getConfiguration(key string) *configuration {

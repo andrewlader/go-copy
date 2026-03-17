@@ -31,12 +31,14 @@ func NewRunner(configName string) (*Runner, error) {
 func (runner *Runner) Copy() {
 	defer runner.handleFinish()
 
+	PrintDebug("file copy initiating...")
+
 	fileCopier := &fileCopier{}
 	fileCopier.run(runner.config)
 
 	runner.Stats = &fileCopier.stats
 
-	Print("file copy complete...")
+	PrintDebug("file copy complete...")
 }
 
 func (runner *Runner) handleFinish() {
