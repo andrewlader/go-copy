@@ -34,29 +34,35 @@ var logMode copylib.LogMode
 func init() {
 	defer handleExit()
 
+	copylib.PrintBlankLine()
+
 	finishedSuccessfully = false
 
 	parseArguments()
 
+	homeFolder, err := os.UserHomeDir()
+	if err != nil {
+		copylib.PrintError(fmt.Sprintf("error getting user home directory: %s", err))
+		homeFolder = ""
+	}
+
 	if !displayBuildInformation {
-		viper.SetConfigName("go-copy-config")         // name of config file (without extension)
-		viper.SetConfigType("yml")                    // REQUIRED if the config file does not have the extension in the name
-		viper.SetConfigType("yaml")                   // REQUIRED if the config file does not have the extension in the name
-		viper.AddConfigPath(".")                      // look for the config file in this directory
-		viper.AddConfigPath("/etc/go-copy")           // look for the config file in this directory
-		viper.AddConfigPath("%USERPROFILE%/.go-copy") // look for the config file in this directory
-		viper.AddConfigPath("%USERPROFILE%/.config")  // look for the config file in this directory
-		viper.AddConfigPath("$HOME/")                 // look for the config file in this directory
-		viper.AddConfigPath("$HOME/.config")          // look for the config file in this directory
-		viper.AddConfigPath("%HOME/.config/go-copy")  // look for the config file in this directory
-		viper.AddConfigPath("config/")                // look for the config file in this directory
-		viper.AddConfigPath("configs/")               // look for the config file in this directory
-		err := viper.ReadInConfig()                   // Find and read the config file
+		viper.SetConfigName("go-copy-config")                // name of config file (without extension)
+		viper.SetConfigType("yml")                           // REQUIRED if the config file does not have the extension in the name
+		viper.SetConfigType("yaml")                          // REQUIRED if the config file does not have the extension in the name
+		viper.AddConfigPath(".")                             // look for the config file in this directory
+		viper.AddConfigPath("/etc/go-copy")                  // look for the config file in this directory
+		viper.AddConfigPath(homeFolder + "/.go-copy")        // look for the config file in this directory
+		viper.AddConfigPath(homeFolder + "/.config")         // look for the config file in this directory
+		viper.AddConfigPath(homeFolder + "/.config/go-copy") // look for the config file in this directory
+		viper.AddConfigPath("config/")                       // look for the config file in this directory
+		viper.AddConfigPath("configs/")                      // look for the config file in this directory
+		err := viper.ReadInConfig()                          // Find and read the config file
 		if err != nil {
 			loadedConfigs = false
 			directUserToCreateConfigFile()
 		} else {
-			copylib.PrintInfo(fmt.Sprintf("config file loaded successfully: %s", viper.ConfigFileUsed()))
+			copylib.PrintSimple(fmt.Sprintf("config file loaded successfully: %s", viper.ConfigFileUsed()))
 			loadedConfigs = true
 		}
 	}
@@ -65,6 +71,8 @@ func init() {
 // main is the entry point of the application. It handles command-line arguments and executes the appropriate actions based on those arguments.
 func main() {
 	defer handleExit()
+
+	copylib.PrintBlankLine()
 
 	if displayBuildInformation {
 		copylib.PrintVersionInfo("build version: ", version)
